@@ -1,0 +1,70 @@
+/* ===== CAREER MODE styles ===== */
+.cstatbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0 8px}
+.cstat{background:#1a1626;border:1px solid #3a3352;border-radius:20px;padding:4px 12px;font-weight:800;font-size:14px;color:#f0e7d3}
+.cstat b{color:var(--purple-glow,#b48cff)}
+.cmapwrap{border:1px solid #3a3352;border-radius:12px;background:radial-gradient(120% 90% at 50% 0%,#221c33 0%,#131020 70%);max-height:56vh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.cmapwrap svg{display:block;width:100%;height:auto}
+.cnode-hit{cursor:pointer}
+@keyframes cpulse{0%,100%{stroke-opacity:.95;stroke-width:3}50%{stroke-opacity:.35;stroke-width:5}}
+.cpulse{animation:cpulse 1.4s ease-in-out infinite}
+.cdetail{border:1px solid #4a4066;border-radius:12px;background:#191428;padding:12px;margin-top:10px}
+.cdetail h3{margin:0 0 4px;font-size:16px;color:#f0e7d3}
+.cdetail .crow{display:flex;gap:8px;font-size:13px;color:#bdb3d4;margin:3px 0}
+.cdetail .crow b{color:#f0e7d3}
+.cgoal{background:#241a33;border:1px dashed #7a5cd6;border-radius:8px;padding:8px 10px;margin:8px 0;font-weight:800;color:#d9c8ff}
+.cshopcard{position:relative}
+.cprice{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:#2a2140;border:1px solid #7a5cd6;border-radius:12px;padding:2px 10px;font-weight:800;font-size:12px;color:#ffd86b;white-space:nowrap}
+.cfailhero{font-size:40px;text-align:center;margin:6px 0}
+
+/* ===== MAP VIEWPORT (pan + zoom camera) =====
+   The wrapper is a fixed-size window; the SVG fills it and we move a viewBox
+   around underneath. No scrollbars, so both axes pan and any map aspect
+   ratio can be fitted. touch-action:none lets us own drag + pinch. */
+.cmapwrap{position:relative;border:1px solid #3a3352;border-radius:12px;
+  background:radial-gradient(120% 90% at 50% 0%,#221c33 0%,#131020 70%);
+  height:clamp(240px,52vh,560px);overflow:hidden;touch-action:none;
+  cursor:grab;user-select:none;-webkit-user-select:none}
+.cmapwrap:active{cursor:grabbing}
+.cmapwrap svg{display:block;width:100%;height:100%}
+.cmapctl{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:6px}
+.cmapctl button{width:34px;height:34px;border-radius:9px;border:1px solid #4a4066;
+  background:rgba(23,18,37,.88);color:#f0e7d3;font-size:16px;font-weight:800;
+  line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cmapctl button:hover{border-color:#7a5cd6;color:#d9c8ff}
+.cmapctl button:active{transform:translateY(1px)}
+
+/* ===== MODS ===== */
+.cmodstrip{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}
+.cmodstrip.empty{font-size:12px;color:#8f86a8;font-style:italic}
+.cmod{width:38px;height:38px;border-radius:10px;border:1px solid #4a4066;background:#1a1626;
+  font-size:19px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cmod:hover{background:#241a33}
+.cmodcard{display:flex;gap:10px;align-items:flex-start;border:1px solid #4a4066;border-left-width:4px;
+  border-radius:10px;background:#191428;padding:10px;margin:6px 0;text-align:left;position:relative}
+.cmodcard .cm-ico{font-size:26px;line-height:1;flex:0 0 auto;margin-top:2px}
+.cmodcard .cm-name{font-weight:800;font-size:14px;color:#f0e7d3;display:flex;gap:8px;align-items:baseline}
+.cmodcard .cm-rar{font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:800}
+.cmodcard .cm-text{font-size:12.5px;color:#bdb3d4;margin-top:3px;line-height:1.35}
+.cmodcard .cm-flav{font-size:11.5px;color:#7d7495;font-style:italic;margin-top:4px}
+.cmodcard .cm-price{position:absolute;top:8px;right:10px;font-weight:800;font-size:13px}
+.cmodpick{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.cmodpickbtn,.cmodbuy{display:block;width:100%;background:none;border:0;padding:0;cursor:pointer}
+.cmodpickbtn:hover .cmodcard,.cmodbuy:not(.broke):hover .cmodcard{background:#241a33;border-color:#7a5cd6}
+.cmodbuy.broke{cursor:not-allowed}
+.cmodbuy.broke .cmodcard{opacity:.5}
+.cmodbrief{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:8px 0 2px}
+.cmodpill{border:1px solid #4a4066;border-radius:14px;padding:3px 9px;font-size:11.5px;
+  font-weight:700;color:#d9c8ff;background:#1a1626}
+
+/* ===== NAMED OPPOSITION (bosses & rivals) ===== */
+.cfoe{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--foe,#7a5cd6);
+  border-left-width:4px;border-radius:10px;padding:10px;margin:8px 0;text-align:left;
+  background:linear-gradient(100deg,color-mix(in srgb,var(--foe,#7a5cd6) 18%,#191428) 0%,#191428 60%)}
+.cfoe.boss{box-shadow:0 0 0 1px rgba(0,0,0,.4),0 6px 20px -8px var(--foe,#7a5cd6)}
+.cfoe .cf-ico{font-size:26px;line-height:1;flex:0 0 auto;margin-top:2px}
+.cfoe.big .cf-ico{font-size:34px}
+.cfoe .cf-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.08em;
+  font-weight:800;color:var(--foe,#b48cff)}
+.cfoe .cf-name{font-weight:800;font-size:15px;color:#f0e7d3;margin-top:1px}
+.cfoe .cf-brief{font-size:12.5px;color:#bdb3d4;margin-top:5px;line-height:1.35}
+.cfoe .cf-threat{font-size:12.5px;font-weight:700;color:#ffd86b;margin-top:6px}
