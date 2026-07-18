@@ -1,0 +1,17 @@
+/* ===== CAREER MODE styles ===== */
+.cstatbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0 8px}
+.cstat{background:#1a1626;border:1px solid #3a3352;border-radius:20px;padding:4px 12px;font-weight:800;font-size:14px;color:#f0e7d3}
+.cstat b{color:var(--purple-glow,#b48cff)}
+.cmapwrap{border:1px solid #3a3352;border-radius:12px;background:radial-gradient(120% 90% at 50% 0%,#221c33 0%,#131020 70%);max-height:56vh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.cmapwrap svg{display:block;width:100%;height:auto}
+.cnode-hit{cursor:pointer}
+@keyframes cpulse{0%,100%{stroke-opacity:.95;stroke-width:3}50%{stroke-opacity:.35;stroke-width:5}}
+.cpulse{animation:cpulse 1.4s ease-in-out infinite}
+.cdetail{border:1px solid #4a4066;border-radius:12px;background:#191428;padding:12px;margin-top:10px}
+.cdetail h3{margin:0 0 4px;font-size:16px;color:#f0e7d3}
+.cdetail .crow{display:flex;gap:8px;font-size:13px;color:#bdb3d4;margin:3px 0}
+.cdetail .crow b{color:#f0e7d3}
+.cgoal{background:#241a33;border:1px dashed #7a5cd6;border-radius:8px;padding:8px 10px;margin:8px 0;font-weight:800;color:#d9c8ff}
+.cshopcard{position:relative}
+.cprice{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:#2a2140;border:1px solid #7a5cd6;border-radius:12px;padding:2px 10px;font-weight:800;font-size:12px;color:#ffd86b;white-space:nowrap}
+.cfailhero{font-size:40px;text-align:center;margin:6px 0}

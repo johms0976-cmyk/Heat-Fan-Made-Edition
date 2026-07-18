@@ -1,0 +1,546 @@
+:root{
+  --tarmac:#17141b; --panel:#221d2b; --panel2:#2c2536;
+  --cream:#f0e7d3; --cream-dim:#b9ae95;
+  --purple:#8a5cf6; --purple-deep:#4b2fa8; --purple-glow:#a985ff;
+  --heat:#e3492b; --heat-dim:#8a3520;
+  --cool:#3fa7d6; --grass:#3e5039;
+  --stress:#d8c23a;
+  --disp:"Avenir Next Condensed","Arial Narrow","Helvetica Neue Condensed","Liberation Sans Narrow",system-ui,sans-serif;
+  --mono:"SF Mono","Roboto Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{height:100%}
+body{
+  background:var(--tarmac); color:var(--cream);
+  font-family:var(--disp); overflow:hidden;
+  display:flex; flex-direction:column; height:100dvh;
+  user-select:none;-webkit-user-select:none;
+}
+/* ---------- header ---------- */
+#topbar{
+  display:flex; align-items:center; gap:10px; padding:8px 12px 6px;
+  border-bottom:1px solid #000;
+  background:linear-gradient(180deg,#241d31,#1a1622);
+}
+#topbar .badge{
+  background:var(--purple-deep); color:#fff; border:2px solid var(--purple);
+  border-radius:50%; width:34px;height:34px; display:flex;align-items:center;justify-content:center;
+  font-weight:800; font-size:15px; flex:none;
+  box-shadow:0 0 10px rgba(138,92,246,.5);
+}
+#topbar h1{font-size:17px; letter-spacing:2.5px; text-transform:uppercase; font-weight:800; line-height:1}
+#topbar .hdrtext{min-width:0}
+#topbar .subrow{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:3px}
+#topbar .sub{font-size:10px; letter-spacing:2px; color:var(--cream-dim); text-transform:uppercase}
+#wchip{font-size:9px; letter-spacing:1.2px; text-transform:uppercase; color:var(--cream);
+  background:rgba(138,92,246,.18); border:1px solid rgba(138,92,246,.5);
+  padding:1px 6px; border-radius:999px; white-space:nowrap; line-height:1.5}
+#wchip[hidden]{display:none}
+#standings{margin-left:auto; display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end; max-width:42%}
+#menubtn{flex:none; margin-left:8px; width:34px; height:34px; border-radius:9px;
+  border:2px solid var(--purple); background:var(--panel2); color:var(--cream);
+  font-size:16px; font-weight:800; line-height:1; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; box-shadow:0 0 8px rgba(138,92,246,.35)}
+#menubtn:active{background:var(--purple-deep)}
+.pos-chip{
+  width:18px;height:18px;border-radius:50%; display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;color:#111; border:1px solid rgba(0,0,0,.5);
+}
+/* landing-spot highlight bands on the track */
+.landhl{pointer-events:none}
+.landhl.exact{opacity:.55}
+.landhl.range{opacity:.30}
+/* ---------- track ---------- */
+#trackwrap{position:relative; background:var(--grass); flex:none; touch-action:none}
+#tracksvg{display:block; width:100%; height:auto}
+/* ---------- gauges strip ---------- */
+#gauges{
+  display:flex; justify-content:space-around; align-items:stretch;
+  padding:7px 6px; gap:6px;
+  background:
+    radial-gradient(circle at 20% -40%, #3a2f52 0%, transparent 60%),
+    linear-gradient(180deg,#2b2340,#1d1828);
+  border-top:2px solid #0c0a10; border-bottom:2px solid #0c0a10;
+}
+.gauge{
+  flex:1; text-align:center; border:1.5px solid #4a3f63; border-radius:10px;
+  background:radial-gradient(circle at 50% 0%, #322a47, #201a2d 75%);
+  padding:5px 2px 4px; box-shadow:inset 0 2px 6px rgba(0,0,0,.6);
+  min-width:0;
+}
+.gauge .lbl{font-size:9px; letter-spacing:1.6px; color:var(--cream-dim); text-transform:uppercase}
+.gauge .val{font-family:var(--mono); font-size:19px; font-weight:700; line-height:1.15; color:var(--cream)}
+.gauge.heatg .val{color:var(--heat)} .gauge.speedg .val{color:var(--purple-glow)}
+/* ---------- main panel ---------- */
+#panel{flex:1; overflow-y:auto; padding:12px 12px 90px; -webkit-overflow-scrolling:touch}
+.phase-title{font-size:13px; letter-spacing:3px; text-transform:uppercase; color:var(--purple-glow); font-weight:800; margin-bottom:2px}
+.phase-hint{font-size:12.5px; color:var(--cream-dim); font-family:system-ui,sans-serif; line-height:1.45; margin-bottom:12px}
+/* gear gate */
+#geargate{display:flex; gap:10px; align-items:center; justify-content:center; margin:6px 0 14px}
+.gearopt{
+  width:56px;height:56px;border-radius:50%; border:2px solid #4a3f63; background:#171221;
+  color:var(--cream); font-size:22px; font-weight:800; display:flex;flex-direction:column;
+  align-items:center;justify-content:center; position:relative; font-family:var(--disp);
+}
+.gearopt small{font-size:8px; letter-spacing:1px; color:var(--cream-dim); font-weight:600}
+.gearopt.sel{border-color:var(--purple-glow); background:var(--purple-deep); box-shadow:0 0 14px rgba(138,92,246,.55)}
+.gearopt.heatcost.sel{border-color:var(--heat)}
+.gearopt:disabled{opacity:.28}
+.gearopt .flame{position:absolute; top:-6px; right:-4px; font-size:12px}
+/* cards */
+#hand,#played{display:flex; gap:8px; overflow-x:auto; padding:6px 2px 10px; scrollbar-width:none}
+#hand::-webkit-scrollbar,#played::-webkit-scrollbar{display:none}
+.card{
+  flex:none; width:66px; height:96px; border-radius:8px; position:relative;
+  border:2px solid #000; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-weight:800; transition:transform .12s;
+  box-shadow:0 3px 6px rgba(0,0,0,.5);
+}
+.card .cv{font-size:30px; line-height:1}
+.card .ct{font-size:8.5px; letter-spacing:1.2px; text-transform:uppercase; margin-top:5px; opacity:.85; text-align:center; padding:0 3px}
+.card.speed{background:linear-gradient(160deg,#6a48d8,#40277e); color:#fff}
+.card.speed::after,.card.up::after{content:""; position:absolute; inset:4px; border:1px solid rgba(255,255,255,.28); border-radius:5px}
+.card.up{background:linear-gradient(160deg,#8f6df2,#5636a8); color:#fff}
+.card.up .cv::before{content:"▲▲"; display:block; font-size:8px; letter-spacing:2px; color:#d9c9ff}
+.card.heatc{background:linear-gradient(160deg,#e3492b,#7c2410); color:#ffe6d2}
+.card.heatc .cv{font-size:22px}
+.card.stressc{background:linear-gradient(160deg,#c9b02c,#6d5c10); color:#fff}
+.card.stressc .cv{font-size:26px}
+.card.garage{background:linear-gradient(160deg,#efe6d0,#c9bda0); color:#241d15; border-color:#241d15}
+.card.garage .ct{font-weight:800; letter-spacing:.8px; opacity:1}
+/* Sponsorship cards (Championship): gold one-shot upgrades */
+.card.sponsor{background:linear-gradient(160deg,#f6dd92,#bd8f2f); color:#241a06; border-color:#3a2c10}
+.card.sponsor::before{content:"🤝"; position:absolute; top:2px; left:4px; font-size:11px}
+.card.sponsor .ct{font-weight:800; letter-spacing:.6px; opacity:1}
+.card .chips{display:flex; flex-wrap:wrap; gap:2px; justify-content:center; margin-top:4px; padding:0 2px}
+/* card artwork scans (assets/cards/…). When a scan loads it becomes the whole
+   card face and the vector text/frame is hidden; if the file is missing the
+   existing CSS/SVG face below stays as the fallback. */
+.card .cart{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:6px; display:block; pointer-events:none}
+.card.hasart .cv,.card.hasart .ct,.card.hasart .chips{display:none}
+.card.hasart::before,.card.hasart::after{content:none}
+.card.hasart .pip{z-index:2; text-shadow:0 1px 3px #000, 0 0 4px #000}
+/* ---------- draw pile (in the play area) + deck-info sheet ----------
+   A face-down pile using assets/cards/starter/draw.png, with a live count and
+   a tap target that opens the "what's left / stress odds" sheet. If the art is
+   missing the vector .dp-face fallback stays. */
+.pileslot{display:flex; align-items:center; gap:12px; padding:2px 2px 4px}
+.drawpile{position:relative; flex:none; width:66px; height:96px; border-radius:8px; cursor:pointer;
+  border:2px solid #000; background:linear-gradient(160deg,#3a2f52,#1c1727); overflow:hidden;
+  box-shadow:0 3px 6px rgba(0,0,0,.5), 3px 3px 0 -1px #241d3a, 6px 6px 0 -2px #1a1528;
+  transition:transform .12s}
+.drawpile:active{transform:translateY(1px)}
+.drawpile .dp-art{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; pointer-events:none}
+.drawpile .dp-face{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  text-align:center; font-family:var(--disp); font-weight:800; font-size:11px; letter-spacing:2px;
+  line-height:1.3; color:#cdbcff; text-transform:uppercase}
+.drawpile .dp-cnt{position:absolute; right:-6px; bottom:-6px; z-index:3; min-width:24px; height:24px; padding:0 5px;
+  border-radius:12px; background:var(--purple-glow); color:#150e26; font-family:var(--mono); font-weight:800;
+  font-size:13px; display:flex; align-items:center; justify-content:center; border:2px solid #150e26;
+  box-shadow:0 2px 5px rgba(0,0,0,.5)}
+.pilehint{font-size:11px; line-height:1.45; color:var(--cream-dim)}
+.pilehint b{color:var(--purple-glow)}
+.pilehint .ev{color:var(--cream)}
+.gauge.deckg{cursor:pointer}
+.gauge.deckg:active{transform:translateY(1px)}
+/* deck-info sheet */
+.dklist{display:flex; flex-direction:column; gap:2px; margin-top:4px}
+.dkrow{display:flex; align-items:center; gap:8px; font-size:13px; padding:4px 8px; border-radius:6px; background:#171221}
+.dkrow span{flex:1; color:var(--cream-dim)} .dkrow b{font-family:var(--mono); color:var(--cream)}
+.odds{display:flex; flex-direction:column; gap:6px}
+.oddrow{display:flex; align-items:center; gap:8px; font-size:12px}
+.oddrow>span{width:56px; color:var(--cream-dim)}
+.oddrow>b{width:38px; text-align:right; font-family:var(--mono); color:var(--purple-glow)}
+.oddbar{flex:1; height:12px; border-radius:6px; background:#171221; overflow:hidden; border:1px solid #372c52}
+.oddbar>i{display:block; height:100%; background:linear-gradient(90deg,#6a48d8,#a985ff)}
+.dkev{margin-top:10px; font-size:13px; color:var(--cream-dim)} .dkev b{color:var(--cream); font-family:var(--mono)}
+/* pre-race briefing modal (Event + Weather cards) */
+.brief-card{width:200px; min-height:280px; border-radius:12px; overflow:hidden; border:2px solid var(--purple-deep);
+  background:#151021; box-shadow:0 8px 26px rgba(0,0,0,.6); display:flex}
+.brief-card img{width:100%; height:auto; object-fit:cover; display:block}
+.brief-card.hasart{min-height:0; border-color:#000}
+.bc-face{flex:1; display:flex; flex-direction:column; gap:8px; padding:14px 12px; text-align:center; align-items:center}
+.bc-event{background:linear-gradient(165deg,#efe6d0,#c9bda0); color:#241d15}
+.bc-wx{background:linear-gradient(165deg,#274a63,#12222f); color:#e8f2fa}
+.bc-kind{font-size:10px; letter-spacing:2.5px; text-transform:uppercase; font-weight:800; opacity:.75}
+.bc-name{font-family:var(--disp); font-size:17px; line-height:1.15; letter-spacing:1px; text-transform:uppercase; font-weight:800}
+.bc-flavor{font-size:9.5px; letter-spacing:1.4px; text-transform:uppercase; opacity:.6}
+.bc-text{font-size:12px; line-height:1.45}
+.bc-foot{font-size:10.5px; line-height:1.5; margin-top:auto; opacity:.85}
+.chip{font-size:8px; font-weight:800; background:#3d3428; color:#f0e7d3; border-radius:4px; padding:1px 3px; letter-spacing:.3px}
+.chip.m{background:#8a2d18} .chip.c{background:#1e6c8f} .chip.s{background:#7a681a} .chip.g{background:#1f6d45}
+input.hsname{user-select:text;-webkit-user-select:text}
+.draftmkt{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; padding:8px 0; max-height:46vh; overflow-y:auto}
+.draftmkt .card{width:76px; height:112px; cursor:pointer}
+.draftmkt .card.taken{opacity:.25; pointer-events:none}
+.card.sel{transform:translateY(-9px); outline:3px solid var(--purple-glow); outline-offset:1px}
+.card.dim{opacity:.38}
+.card .pip{position:absolute; top:3px; left:5px; font-size:12px}
+.card .pip.r{left:auto; right:5px}
+/* hold / hover card help */
+#cardtip{
+  position:fixed; z-index:120; max-width:290px; display:none;
+  background:linear-gradient(180deg,#2c2536,#201a2d);
+  border:2px solid var(--purple); border-radius:11px; padding:11px 13px;
+  font-family:system-ui,sans-serif; font-size:12.5px; line-height:1.5; color:var(--cream);
+  box-shadow:0 10px 34px rgba(0,0,0,.65), 0 0 14px rgba(138,92,246,.25);
+  pointer-events:none;
+}
+#cardtip h4{font-family:var(--disp); letter-spacing:1.6px; text-transform:uppercase;
+  font-size:12px; color:var(--purple-glow); margin:0 0 5px}
+#cardtip ul{margin:0; padding:0; list-style:none}
+#cardtip li{margin:5px 0 0; padding-left:2px}
+#cardtip li b:first-child{color:#ffd9a8}
+#cardtip .tiphint{margin-top:7px; font-size:10.5px; color:var(--cream-dim); letter-spacing:.4px}
+/* buttons */
+.btnrow{display:flex; flex-wrap:wrap; gap:9px; margin-top:6px}
+button.act{
+  font-family:var(--disp); font-weight:800; letter-spacing:1.6px; text-transform:uppercase;
+  font-size:13.5px; padding:13px 18px; border-radius:9px; border:2px solid var(--purple);
+  background:linear-gradient(180deg,#6a45d8,#4b2fa8); color:#fff; flex:1; min-width:120px;
+  box-shadow:0 3px 0 #2c1a66;
+}
+button.act:active{transform:translateY(2px); box-shadow:0 1px 0 #2c1a66}
+button.act.secondary{background:#241d31; border-color:#4a3f63; color:var(--cream); box-shadow:0 3px 0 #0e0b14}
+button.act.hot{background:linear-gradient(180deg,#e3562b,#9c2c12); border-color:#ff9b6a; box-shadow:0 3px 0 #5c1a08}
+button.act.cool{background:linear-gradient(180deg,#3fa7d6,#1f6a94); border-color:#8fd4f2; box-shadow:0 3px 0 #124158}
+button.act:disabled{opacity:.35; pointer-events:none}
+/* Engine Heat pips */
+#enginebar{display:flex; gap:5px; align-items:center; margin:4px 0 10px; flex-wrap:wrap}
+#enginebar .elbl{font-size:10px; letter-spacing:2px; color:var(--cream-dim); text-transform:uppercase; margin-right:4px}
+.hpip{width:15px; height:22px; border-radius:3px; background:linear-gradient(180deg,#ff7a3d,#c22c0d); border:1px solid #000; box-shadow:0 0 6px rgba(227,73,43,.5)}
+.hpip.empty{background:#241d31; box-shadow:none; border-color:#3a3148}
+/* corner-heat forecast strip */
+.forecast{font-family:system-ui,sans-serif; font-size:12.5px; line-height:1.45; border-radius:8px;
+  padding:8px 11px; margin:2px 0 10px; border:1.5px solid #4a3f63; background:#1d1828; color:var(--cream-dim)}
+.forecast b{color:var(--cream)}
+.forecast.warn{border-color:var(--heat); color:#ffd9c8; background:#2a160f}
+.forecast.warn b{color:#ffb08a}
+.forecast.spin{border-color:#ff5a3c; color:#fff; background:#571507; font-weight:700}
+/* log */
+#logwrap{position:fixed; left:0; right:0; bottom:0; z-index:30;
+  background:linear-gradient(180deg,#141019 0,#0d0a12 100%); border-top:2px solid #000;}
+#logtoggle{width:100%; text-align:left; background:none; border:none; color:var(--cream-dim);
+  font-family:var(--mono); font-size:11px; padding:8px 14px; letter-spacing:.4px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+#logbody{max-height:0; overflow-y:auto; transition:max-height .25s; padding:0 14px; font-family:var(--mono); font-size:11px; line-height:1.7; color:var(--cream-dim)}
+#logwrap.open #logbody{max-height:34dvh; padding-bottom:12px}
+#logbody .me{color:var(--purple-glow)} #logbody .warn{color:var(--heat)}
+/* overlays */
+/* NOTE: a flex item centred with align-items:center overflows equally off BOTH
+   ends when it is taller than the container — and the overflow above the top
+   edge is unreachable by scrolling. That is what hid the first track card
+   (Pukekohe) on the picker. Auto margins on the item resolve to 0 when the
+   free space is negative, so the sheet sits flush to the top and scrolls. */
+.overlay{position:fixed; inset:0; z-index:50; background:rgba(10,8,14,.93); display:flex; align-items:flex-start; justify-content:center;
+  padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px)); overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain}
+.sheet{width:100%; max-width:420px; margin:auto; background:linear-gradient(180deg,#2b2340,#1c1727); border:2px solid var(--purple-deep); border-radius:16px; padding:22px; box-shadow:0 10px 40px rgba(0,0,0,.7)}
+.sheet h2,.sheet h1{font-size:24px; letter-spacing:3px; text-transform:uppercase; color:#fff; font-weight:800}
+.sheet h2 span,.sheet h1 span{color:var(--purple-glow)}
+.sheet .tag{font-size:10px; letter-spacing:2.5px; color:var(--cream-dim); text-transform:uppercase; margin-bottom:16px}
+/* track picker cards */
+.tracklist{display:flex; flex-direction:column; gap:12px}
+/* Circuit picker: the sheet itself is pinned to the viewport and ONLY the list
+   of tracks scrolls — the title, the strapline and the Back button stay put. */
+.sheet.tspicker{display:flex; flex-direction:column; padding-bottom:16px;
+  max-height:calc(100vh - 40px - env(safe-area-inset-bottom,0px));
+  max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px)); overflow:hidden}
+.sheet.tspicker > h1,
+.sheet.tspicker > .tag,
+.sheet.tspicker > .btnrow{flex:0 0 auto}
+.sheet.tspicker .tracklist{flex:1 1 auto; min-height:120px; overflow-y:auto;
+  -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+  padding:2px 10px 6px 2px; margin-right:-8px}
+.sheet.tspicker .tracklist::-webkit-scrollbar{width:5px}
+.sheet.tspicker .tracklist::-webkit-scrollbar-thumb{background:#4a3f63; border-radius:3px}
+
+/* Race Rules */
+.racerules{display:flex; flex-direction:column; gap:12px}
+/* Race Rules: the sheet itself is pinned to the viewport and ONLY the list
+   of rules scrolls — the title, the strapline and the Back button stay put. */
+.sheet.rules{display:flex; flex-direction:column; padding-bottom:16px;
+  max-height:calc(100vh - 40px - env(safe-area-inset-bottom,0px));
+  max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px)); overflow:hidden}
+.sheet.rules > h1,
+.sheet.rules > .tag,
+.sheet.rules > .btnrow{flex:0 0 auto}
+.sheet.rules .racerules{flex:1 1 auto; min-height:120px; overflow-y:auto;
+  -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+  padding:2px 10px 6px 2px; margin-right:-8px}
+.sheet.rules .racerules::-webkit-scrollbar{width:5px}
+.sheet.rules .racerules::-webkit-scrollbar-thumb{background:#4a3f63; border-radius:3px}
+
+    
+  
+/* circuit brief modal — outline + a line or two, then cancel / next */
+#trackModal{z-index:70; background:rgba(10,8,14,.95)}
+#trackModal .sheet{max-width:400px; border-color:var(--purple-glow); box-shadow:0 10px 44px rgba(0,0,0,.75)}
+#trackModal h2{font-size:22px; letter-spacing:2.5px; margin:0 0 12px}
+#trackModal .tag{margin-bottom:6px}
+#trackModal .btnrow button{flex:1}
+.tm-art{border-radius:12px; overflow:hidden; border:1px solid #000; margin-bottom:12px;
+  background:radial-gradient(120% 120% at 40% 20%,#2c2440,#14101d)}
+.tm-art svg{display:block; width:100%; height:auto}
+.tm-meta{font-family:var(--disp); font-weight:700; font-size:10px; letter-spacing:1.6px;
+  text-transform:uppercase; color:var(--purple-glow); margin-bottom:9px}
+.tm-brief{font-family:system-ui,sans-serif; font-size:13.5px; line-height:1.5;
+  color:var(--cream); margin-bottom:16px}
+.trackcard{display:flex; align-items:center; gap:14px; width:100%; text-align:left;
+  padding:12px; border-radius:12px; border:2px solid #4a3f63;
+  background:linear-gradient(180deg,#201a2e,#171221); color:var(--cream);
+  font-family:var(--disp); cursor:pointer; box-shadow:0 3px 0 #0e0b14; transition:border-color .15s, transform .05s}
+.trackcard:hover{border-color:var(--purple-glow)}
+.trackcard:active{transform:translateY(2px); box-shadow:0 1px 0 #0e0b14}
+.trackcard .tc-art{flex:none; width:104px; height:78px; border-radius:8px; overflow:hidden;
+  background:radial-gradient(120% 120% at 40% 20%,#2c2440,#14101d); border:1px solid #000}
+.trackcard .tc-art svg{display:block; width:100%; height:100%}
+.trackcard .tc-body{flex:1; min-width:0}
+.trackcard .tc-name{font-size:19px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; line-height:1.05}
+.trackcard .tc-meta{font-size:10px; letter-spacing:1.5px; color:var(--cream-dim); text-transform:uppercase; margin-top:5px}
+.trackcard .tc-go{flex:none; font-size:12px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:var(--purple-glow)}
+/* championship cups */
+.cupcard{align-items:flex-start}
+.cupcard .tc-art{width:74px; height:74px; display:flex; align-items:center; justify-content:center; font-size:34px}
+.cupcard .tc-rounds{font-size:11px; letter-spacing:1px; color:var(--cream); text-transform:uppercase; margin-top:7px; line-height:1.6; opacity:.85}
+.cupcard .tc-rounds .missing{color:#ff8163}
+.trackcard.pick{position:relative}
+.trackcard.pick.on{border-color:var(--purple-glow); background:linear-gradient(180deg,#2f2547,#1d1730)}
+.trackcard .pickbadge{flex:none; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  border:2px solid #4a3f63; color:var(--cream-dim); font-family:var(--mono); font-size:12px; font-weight:700}
+.trackcard.on .pickbadge{border-color:var(--purple-glow); background:var(--purple-deep); color:#fff}
+.trackcard.locked{opacity:.75; cursor:default}
+.cuprail{display:flex; gap:6px; margin:10px 0 2px}
+.cuprail div{flex:1; text-align:center; padding:7px 2px; border-radius:8px; border:2px dashed #4a3f63; color:var(--cream-dim);
+  font-size:10px; letter-spacing:1px; text-transform:uppercase; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.cuprail div.set{border-style:solid; border-color:var(--purple-glow); color:var(--cream)}
+/* ---- deck select (garage carousel): one deck on screen, swipe or arrows ---- */
+.deckwrap{position:relative; display:flex; align-items:center; gap:8px; margin-top:4px}
+.deckstage{flex:1; min-width:0; overflow:hidden; border-radius:14px; touch-action:pan-y}
+.deckcard{border:2px solid var(--purple-glow); border-radius:14px; padding:14px;
+  background:linear-gradient(180deg,#2f2547,#1a1526); box-shadow:0 4px 0 #0e0b14, inset 0 1px 0 rgba(255,255,255,.05)}
+.deckcard.slide-l{animation:deckInL .22s ease-out}
+.deckcard.slide-r{animation:deckInR .22s ease-out}
+@keyframes deckInL{from{opacity:0; transform:translateX(-26%)} to{opacity:1; transform:none}}
+@keyframes deckInR{from{opacity:0; transform:translateX(26%)}  to{opacity:1; transform:none}}
+.deckcard .dk-art{position:relative; width:100%; height:190px; border-radius:10px; overflow:hidden;
+  border:1px solid #000; background:radial-gradient(120% 110% at 50% 18%,#3a2f58,#140f1e);
+  display:flex; align-items:center; justify-content:center}
+.deckcard .dk-art img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block}
+.deckcard .dk-art .dk-fallback{font-size:74px; line-height:1}
+.dk-model{width:100%; height:100%; display:flex; align-items:center; justify-content:center}
+.dk-model svg{width:92%; height:92%; overflow:visible}
+.deckcard .dk-name{font-size:22px; font-weight:800; letter-spacing:2px; text-transform:uppercase; margin-top:12px; line-height:1.05}
+.deckcard .dk-tag{font-size:10px; letter-spacing:1.6px; text-transform:uppercase; color:var(--purple-glow); margin-top:5px}
+.deckcard .dk-stats{display:flex; flex-wrap:wrap; gap:5px; margin-top:10px}
+.deckcard .dk-stats span{font-size:9.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+  padding:4px 7px; border-radius:999px; border:1px solid #4a3f63; background:#171221; color:var(--cream-dim); white-space:nowrap}
+.deckcard .dk-stats span.up{border-color:#3e8f4d; color:#bfe8c6}
+.deckcard .dk-stats span.dn{border-color:var(--heat-dim); color:#ffc7b0}
+.deckcard .dk-blurb{font-size:11px; line-height:1.6; letter-spacing:.6px; color:var(--cream-dim); margin-top:10px}
+.deckarrow{flex:none; width:38px; height:78px; border-radius:10px; border:2px solid #4a3f63;
+  background:#171221; color:var(--cream); font-size:24px; font-weight:800; line-height:1;
+  display:flex; align-items:center; justify-content:center; box-shadow:0 3px 0 #0e0b14}
+.deckarrow:active{transform:translateY(2px); box-shadow:0 1px 0 #0e0b14; background:var(--purple-deep)}
+.deckdots{display:flex; justify-content:center; gap:8px; margin-top:12px}
+.deckdots button{width:9px; height:9px; padding:0; border-radius:50%; border:1px solid #4a3f63; background:#171221}
+.deckdots button.on{background:var(--purple-glow); border-color:var(--purple-glow); box-shadow:0 0 8px var(--purple-glow)}
+.optgroup{margin:14px 0}
+.optgroup .olbl{font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:7px}
+.seg{display:flex; gap:7px}
+.seg button{flex:1; padding:11px 4px; border-radius:8px; border:2px solid #4a3f63; background:#171221; color:var(--cream); font-family:var(--disp); font-weight:700; font-size:14px; letter-spacing:1px}
+.seg button.sel{border-color:var(--purple-glow); background:var(--purple-deep)}
+.standrow{display:flex; align-items:center; gap:12px; padding:9px 6px; border-bottom:1px solid #362c4d; font-size:16px}
+.standrow .p{font-family:var(--mono); font-weight:700; width:26px; color:var(--cream-dim)}
+.standrow .dot{width:16px;height:16px;border-radius:50%;border:1px solid #000}
+
+  
+  /* toast */
+#toast{position:fixed; top:14%; left:50%; transform:translate(-50%,0); z-index:60;
+  background:rgba(20,15,30,.95); border:2px solid var(--purple); color:var(--cream);
+  border-radius:12px; padding:14px 22px; font-size:15px; letter-spacing:1px; font-weight:700;
+  text-transform:uppercase; opacity:0; pointer-events:none; transition:opacity .25s; text-align:center; max-width:86%;}
+#toast.show{opacity:1}
+#toast.hot{border-color:var(--heat); color:#ffd9c8}
+/* spin-out confirm modal */
+#confirmModal{z-index:70; background:rgba(10,8,14,.95)}
+#confirmModal .sheet{max-width:360px; border-color:#ff5a3c; box-shadow:0 10px 40px rgba(0,0,0,.75)}
+#confirmModal h2{font-size:19px; letter-spacing:2px}
+#confirmModal .cfbody{margin:0 0 16px}
+/* spin-out event modal (image + crash sfx) */
+#spinModal{z-index:80; background:rgba(6,4,9,.96)}
+#spinModal .sheet{max-width:440px; border-color:#ff5a3c; box-shadow:0 10px 48px rgba(227,73,43,.35); text-align:center; padding:18px}
+#spinModal h2{font-size:22px; letter-spacing:3px; color:#ff8163; margin:0 0 12px}
+#spinModal img{width:100%; height:auto; border-radius:12px; display:block; margin:0 0 16px;
+  border:2px solid #5c1a08; box-shadow:0 6px 22px rgba(0,0,0,.6)}
+#spinModal .spinsub{color:var(--cream-dim); font-size:13px; margin:0 0 16px; line-height:1.4}
+/* track svg bits */
+.spaceline{stroke:#5b5364; stroke-width:1}
+.cornerline{stroke:#ffb03d; stroke-width:2.5}
+/* cars are animated frame-by-frame along the track path (see stepCar) —
+   no CSS transform transition, or the browser would fight the rAF loop. */
+#tracksvg text{font-family:var(--disp)}
+@media (prefers-reduced-motion: reduce){ .card{transition:none} }
+/* replay control bar */
+#replayhud{position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:80;
+  display:flex; align-items:center; gap:14px; padding:10px 16px; border-radius:12px;
+  background:rgba(15,12,22,.93); border:1px solid #4a3f66; box-shadow:0 8px 30px rgba(0,0,0,.55);
+  font-family:var(--disp); color:#efe6d0; letter-spacing:1px; font-size:13px; white-space:nowrap}
+#replayhud .rp-title{color:var(--purple-glow); font-weight:800}
+#replayhud button{background:#241d33; color:#efe6d0; border:1px solid #4a3f66; border-radius:8px;
+  padding:5px 10px; font-family:var(--disp); cursor:pointer; font-size:12px}
+#replayhud .rp-speeds button.on{background:var(--purple-glow); color:#14101a; border-color:var(--purple-glow)}
+.cornerbadge text{font-family:var(--disp); font-weight:800; text-anchor:middle}
+.cornerbadge .disc{fill:#f0e7d3; stroke:#111; stroke-width:2}
+.cornerbadge .num{fill:#111}
+#turnptr{transition:transform .55s ease}
+/* ==================================================================
+   INTRO OVERLAYS (loading + title) — layered above the game screens so
+   the whole thing lives in one page and the music never stops.
+   ================================================================== */
+#stage{
+  position:fixed; inset:0; z-index:310; cursor:pointer;
+  background:#000 center/cover no-repeat;
+  background-image:url("screens/background.png");
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+  transition:opacity .7s ease;
+}
+#stage.hide{opacity:0; pointer-events:none}
+#stage::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(120% 80% at 50% 30%, transparent 40%, rgba(0,0,0,.55) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.25) 0%, transparent 30%, transparent 55%, rgba(0,0,0,.72) 100%);
+}
+#prompt{position:relative; z-index:2; text-align:center; margin-bottom:14vh; animation:float 3.4s ease-in-out infinite}
+#prompt .eyebrow{font-size:clamp(11px,2.4vw,15px); letter-spacing:6px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:10px}
+
+  
+  #Heats{
+  display:inline-block; font-size:clamp(38px,10vw,86px); font-weight:800; line-height:.92;
+  letter-spacing:3px; text-transform:uppercase; color:var(--cream);
+  text-shadow:0 0 22px rgba(138,92,246,.65), 0 4px 18px rgba(0,0,0,.7);
+  animation:pulse 2.1s ease-in-out infinite;
+}
+#Heats .metal{color:var(--heat); text-shadow:0 0 26px rgba(227,73,43,.7), 0 4px 18px rgba(0,0,0,.7)}
+#hint{position:relative; z-index:2; font-size:clamp(10px,2.2vw,13px); letter-spacing:3px; text-transform:uppercase; color:var(--cream-dim); margin-top:37vh; opacity:.85}
+
+  
+#start{
+  display:inline-block; font-size:clamp(38px,10vw,86px); font-weight:800; line-height:.92;
+  letter-spacing:3px; text-transform:uppercase; color:var(--cream);
+  text-shadow:0 0 22px rgba(138,92,246,.65), 0 4px 18px rgba(0,0,0,.7);
+  animation:pulse 2.1s ease-in-out infinite;
+}
+#start .metal{color:var(--heat); text-shadow:0 0 26px rgba(227,73,43,.7), 0 4px 18px rgba(0,0,0,.7)}
+#hint{position:relative; z-index:2; font-size:clamp(10px,2.2vw,13px); letter-spacing:3px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:6vh; opacity:.85}
+
+  
+#soundNote{
+  position:fixed; z-index:330; top:14px; right:14px;
+  font-size:11px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--cream); background:rgba(75,47,168,.55); border:1px solid var(--purple);
+  border-radius:999px; padding:7px 14px; display:none; align-items:center; gap:7px;
+  box-shadow:0 0 14px rgba(138,92,246,.4); cursor:pointer;
+}
+#soundNote.show{display:flex}
+
+#loader{
+  position:fixed; inset:0; z-index:320; cursor:pointer;
+  background:radial-gradient(120% 100% at 50% 32%, #221a2d 0%, #17141b 68%, #0c0a10 100%);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:clamp(26px,5vh,40px); transition:opacity .6s ease;
+}
+#loader.done{opacity:0; pointer-events:none}
+
+/* --- loader backdrop art (assets/loading.png).
+   Only applied once the image is confirmed to load (JS adds .art); until then
+   the original radial gradient above stands in, so a missing file is invisible. */
+#loader.art{
+  background:#0c0a10 center/cover no-repeat;
+  background-image:
+    linear-gradient(180deg, rgba(12,10,16,.45), rgba(12,10,16,.8)),
+    url("assets/loading.png");
+}
+
+/* --- HEAT wordmark.
+   Two nodes live in the markup: the <img> (assets/titlename.png) and the old
+   text version. Whichever one survives is shown; if the img 404s, JS/onerror
+   flips to the text and nothing looks broken. */
+.load-title{font-size:clamp(46px,13vw,120px); font-weight:800; letter-spacing:9px; line-height:.9; color:var(--cream); text-shadow:0 0 34px rgba(138,92,246,.4)}
+.load-title b{color:var(--heat); font-weight:800; text-shadow:0 0 34px rgba(227,73,43,.55)}
+img.load-title{display:block; width:min(70vw,520px); height:auto; text-shadow:none;
+  filter:drop-shadow(0 0 30px rgba(138,92,246,.45))}
+.load-title[hidden]{display:none}
+
+.gantry{display:flex; gap:clamp(9px,3.2vw,24px); padding:clamp(10px,2.4vw,16px) clamp(14px,3.4vw,24px); border-radius:16px; background:linear-gradient(180deg,#0c0a10,#050406); box-shadow:0 12px 34px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05)}
+/* over artwork the solid black slab looks pasted on — soften it */
+body.skulls .gantry, body.skulls-solid .gantry{
+  background:linear-gradient(180deg,rgba(12,10,16,.7),rgba(5,4,6,.7));
+  -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+}
+
+/* --- FALLBACK (always present): the original round grid lights.
+   This is what you get if skull1.png is missing or masks aren't supported. */
+.lamp{width:clamp(28px,7.6vw,50px); height:clamp(28px,7.6vw,50px); border-radius:50%; background:radial-gradient(circle at 38% 34%, #571a12, #290c08 72%); box-shadow:inset 0 2px 7px rgba(0,0,0,.75); transition:background .1s ease, box-shadow .1s ease}
+.lamp.on{background:radial-gradient(circle at 38% 34%, #ff8163, #ff2d10 52%, #b91d09 100%); box-shadow:0 0 24px 5px rgba(255,58,28,.7), inset 0 2px 6px rgba(0,0,0,.25)}
+
+/* --- PREFERRED: skull cut out with a CSS mask, so background-color paints the
+   bone and drop-shadow traces the silhouette. JS adds body.skulls only when
+   the PNG loads AND has real transparency AND mask-image is supported. */
+body.skulls .lamp{
+  width:clamp(32px,8.4vw,56px); height:clamp(32px,8.4vw,56px);
+  border-radius:0; box-shadow:none; background-image:none;
+  background-color:#4a1810;                        /* cold, unlit skull */
+  -webkit-mask:url("assets/loading/skull1.png") center/contain no-repeat;
+          mask:url("assets/loading/skull1.png") center/contain no-repeat;
+  transition:background-color .18s ease, transform .18s ease;
+}
+body.skulls .lamp.on{
+  background-color:#ff2d10; transform:scale(1.06); box-shadow:none;
+  animation:skullglow 1.3s ease-in-out infinite;
+}
+
+/* --- SECOND FALLBACK: the PNG loads but is opaque (skull baked onto a
+   background), so masking would just draw a red square. Draw the art itself
+   and tint it with filters instead. */
+body.skulls-solid .lamp{
+  width:clamp(32px,8.4vw,56px); height:clamp(32px,8.4vw,56px);
+  border-radius:0; box-shadow:none;
+  background:url("assets/loading/skull1.png") center/contain no-repeat;
+  opacity:.35; filter:brightness(.45) saturate(.5);
+  transition:opacity .18s ease, filter .18s ease, transform .18s ease;
+}
+body.skulls-solid .lamp.on{
+  opacity:1; transform:scale(1.06); box-shadow:none;
+  filter:brightness(1.15) saturate(1.4)
+         drop-shadow(0 0 7px rgba(255,58,28,.9)) drop-shadow(0 0 20px rgba(255,45,16,.6));
+}
+
+@keyframes skullglow{
+  0%,100%{filter:drop-shadow(0 0 5px rgba(255,58,28,.9)) drop-shadow(0 0 16px rgba(255,45,16,.55))}
+  50%    {filter:drop-shadow(0 0 9px rgba(255,110,80,1)) drop-shadow(0 0 28px rgba(255,45,16,.85))}
+}
+@media (prefers-reduced-motion: reduce){
+  body.skulls .lamp.on{animation:none; filter:drop-shadow(0 0 8px rgba(255,58,28,.95)) drop-shadow(0 0 22px rgba(255,45,16,.7))}
+}
+.load-bar{width:min(66vw,340px); height:6px; border-radius:99px; background:#2a2436; overflow:hidden}
+.load-fill{height:100%; width:0; background:linear-gradient(90deg,var(--purple),var(--heat)); border-radius:99px}
+.load-status{font-size:clamp(11px,2.6vw,14px); letter-spacing:3px; text-transform:uppercase; color:var(--cream-dim); min-height:16px; text-align:center}
+/* Pre-race loading screen — same furniture as the intro loader, but it sits
+   between the setup summary and lights-out (and between championship races).
+   z-index 200: above every setup sheet / modal, below the intro overlays. */
+#raceload{
+  position:fixed; inset:0; z-index:200; display:none;
+  background:radial-gradient(120% 100% at 50% 32%, #221a2d 0%, #17141b 68%, #0c0a10 100%);
+  flex-direction:column; align-items:center; justify-content:center;
+  gap:clamp(20px,4vh,34px); transition:opacity .5s ease; opacity:1;
+}
+#raceload.done{opacity:0; pointer-events:none}
+#raceload .rl-track{font-size:clamp(26px,7vw,54px); font-weight:800; letter-spacing:4px;
+  text-transform:uppercase; color:var(--cream); text-align:center; line-height:1;
+  text-shadow:0 0 30px rgba(138,92,246,.45); padding:0 16px}
+#raceload .rl-sub{font-size:clamp(10px,2.4vw,13px); letter-spacing:4px; text-transform:uppercase;
+  color:var(--purple-glow); text-align:center; margin-top:10px; padding:0 16px}
+@keyframes float{0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)}}
+@keyframes pulse{0%,100%{opacity:1; text-shadow:0 0 22px rgba(138,92,246,.65),0 4px 18px rgba(0,0,0,.7)} 50%{opacity:.72; text-shadow:0 0 8px rgba(138,92,246,.3),0 4px 18px rgba(0,0,0,.7)}}
+@media (prefers-reduced-motion: reduce){#prompt,#start{animation:none}}
