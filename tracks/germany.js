@@ -13,7 +13,7 @@ const TRACK_GERMANY = defineTrack({
   key:"germany",
   brief:"test.",
   name:"Deutchland", spaces:62, defaultLaps:2, heat:5, stress:3,
-  image:"", imgW:1200, imgH:800,
+  image:"tracks/germany.JPG", imgW:1200, imgH:800,
   eyebrow:"German Grand Prix",
   subtitle:"Rocky Road Expansion",
   tagline:"",
