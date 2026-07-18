@@ -574,7 +574,7 @@ const VEHICLE_CLASSES = [
     cool:{1:3, 2:1},
     starters:[ {name:"Lean In", v:0, limit:1}, {name:"Wheelie", v:4, heat:1}, {xheat:true} ],
     blurb:"Slow deck (4×1 3×2 3×3 2×4, total 27) · tiny 4 heat · corner limits are 1 HIGHER for you · slipstream 3 spaces · Spinouts deal +1 extra Stress." },
-  { key:"buggy", icon:"🚜", name:"Privateer", art:"assets/avatars/decks/buggy.png",
+  { key:"buggy", icon:"🚜", name:"Rallycross", art:"assets/avatars/decks/buggy.png",
     tag:"Fan Made - The underdog entry. Never fast, never stranded.",
     deck:[3,3,3,3], tank:-1, stress:+1, limitAdj:0, slipBase:2, spinStress:0,
     cool:{1:3, 2:1, 3:1, 4:1},
