@@ -60,6 +60,15 @@ const TRACK_NEWYORK = defineTrack({
      draw deck) are not discards, so both are still allowed inside a tunnel. */
   tunnels:[  ],
 
+     /* Trackside props — what the first-person cockpit cam (fpview.js) builds
+     beside the road. Inclusive space runs (wrapping past 0 on loops); side
+     \"out\" = away from the Race Line, \"in\" = the Race Line side; kind is
+     one of the TS_KINDS keys (beach, grandstand, pits, buildings, forest…).
+     Purely visual — no effect on the rules. Unclaimed spaces keep the
+     terrain's usual random scenery. */
+  trackside:[ {from:0, to:40, side:"out", kind:"buildings"}, {from:0, to:10, side:"in", kind:"crowdbank"}, {from:41, to:51, side:"out", kind:"beach"}, {from:16, to:21, side:"in", kind:"industry"}, {from:52, to:75, side:"in", kind:"field"}, {from:52, to:75, side:"out", kind:"field"}, {from:11, to:15, side:"out", kind:"pits"} ],
+
+
   legendsLine:7,
   spacePts:[[99,76],[102,122],[104,169],[105,215],[106,261],[106,308],[106,354],[105,401],[104,447],[103,501],[103,540],[109,594],[66,655],[69,703],[136,715],[175,679],[235,673],[274,673],[323,676],[368,676],[413,676],[461,676],[507,673],[552,673],[597,673],[645,673],[687,673],[730,676],[787,679],[826,676],[877,676],[917,673],[971,673],[1016,636],[1040,579],[1055,546],[1070,486],[1094,453],[1119,407],[1140,362],[1113,308],[1079,341],[1052,407],[1028,440],[977,483],[932,498],[877,501],[823,492],[778,480],[736,456],[690,428],[660,401],[627,350],[606,317],[582,272],[564,238],[549,181],[519,142],[476,109],[425,85],[368,88],[317,124],[295,166],[286,220],[295,269],[329,314],[362,332],[425,368],[434,419],[377,431],[320,409],[274,407],[223,431],[193,477],[175,516],
             [160,561]]
