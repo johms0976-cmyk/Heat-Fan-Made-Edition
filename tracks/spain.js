@@ -14,7 +14,7 @@ const TRACK_SPAIN = defineTrack({
   eyebrow:"Spanish Grand Prix",
   subtitle:"Tunnel Vision Expansion",
   tagline:"",
-  terrain:"urban",
+  terrain:"spain",
   plate:{ x:-20, y:-35, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"Outrun the Bull!",
           titleColor:"#f7ce46", subColor:"#e22400" },
   panel:{x:58,y:692}, podium:{x:965,y:195},
