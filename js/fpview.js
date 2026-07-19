@@ -956,6 +956,646 @@ function scatterProps(hz, spacing, draw){
   }
 }
 
+   /* =====================================================================
+   TRACKSIDE FEATURES — declared per track (set in the track editor):
+
+       trackside:[ {from:3, to:6, side:"out", kind:"grandstand"},
+                   {from:10, to:20, side:"out", kind:"beach"}, … ]
+
+   from/to are inclusive space indices (wrapping past 0 on loops), side
+   is "out" (away from the Race Line) or "in" (the Race Line side), and
+   kind is one of TS_KINDS below. Kinds with a `band` repaint the ground
+   itself (sand running down to the sea, crops, a car-park apron); every
+   kind also places deterministic props, replacing the terrain's random
+   scenery on the spaces it claims. Purely visual — no rules effect.
+   The editor mirrors this catalogue as TS_TYPES; keep the keys in step.
+   ===================================================================== */
+const TS_KINDS = {
+  beach:      { band:"beach" },   lake:       { band:"water" },
+  harbor:     { band:"quay"  },   lighthouse: {},
+  grandstand: {},                 crowdbank:  {},
+  pits:       {},                 paddock:    {},
+  carpark:    { band:"lot"   },   billboards: {},
+  floodlights:{},                 barrier:    {},
+  buildings:  {},                 houses:     {},
+  industry:   {},                 funfair:    {},
+  windfarm:   {},                 forest:     {},
+  palms:      {},                 field:      { band:"crops" },
+  campsite:   {},                 rocks:      {}
+};
+
+let TSC = { track:null, in:null, out:null };
+function tracksideCache(){
+  if(TSC.track === TRACK && TSC.in) return TSC;
+  const inM = new Map(), outM = new Map();
+  const list = (typeof TRACK !== "undefined" && TRACK && TRACK.trackside) || [];
+  for(const e of list){
+    if(!e || !TS_KINDS[e.kind]) continue;
+    const M = (e.side === "in" || e.side === -1) ? inM : outM;
+    const a = (((e.from|0))%S+S)%S, b = (((e.to|0))%S+S)%S;
+    for(let k=0, sp=a; k<S; k++, sp=(sp+1)%S){ M.set(sp, e.kind); if(sp===b) break; }
+  }
+  TSC = { track:TRACK, in:inM, out:outM };
+  return TSC;
+}
+
+/* props a trackside kind plants on one space — deterministic, like the
+   random scenery, so the same stand is on the same brow lap after lap.
+   lat is EXTRA distance beyond the gravel strip (matches propCache). */
+function tsProps(sp, side, kind){
+  const h = a => hsh(sp*a + side*7.7);
+  const out = [];
+  const add = (k, frac, lat, sc, r)=> out.push({ side, kind:k, frac, lat, sc, r });
+  switch(kind){
+  case "grandstand": add("stand",  .5, 4.5, 1, h(3.1)); break;
+  case "crowdbank":  add("bank",   .5, 5,   1, h(3.3)); break;
+  case "pits":       add("pitbox", .5, 3.5, 1, h(2.9)); break;
+  case "billboards": add("hoard",  .5, 3.5, 1, h(8.1)); break;
+  case "barrier":    add("wallseg",.5, 2,   1, h(4.7)); break;
+  case "floodlights":add("flood",  .5, 5,   1, h(5.3)); break;
+  case "paddock":
+    add(h(2.2) < .5 ? "truck" : "tent", .3 + h(5.1)*.4, 5 + h(4.4)*9, .95 + h(6.6)*.25, h(9.1));
+    if(h(7.7) < .5) add("tent", .82, 13 + h(3.9)*8, .85, h(8.8));
+    break;
+  case "carpark":
+    for(let k=0;k<3;k++) add("parked", (k+.5)/3 + (hsh(sp*3+k)-.5)*.14,
+                             3.5 + hsh(sp*4.4+k)*4, 1, hsh(sp*5.5+k));
+    break;
+  case "buildings":
+    add("towerblk", .5, 9 + h(4.1)*6, .9 + h(5.5)*.5, h(6.2));
+    if(h(8.2) < .6) add("towerblk", .12, 20 + h(9.3)*10, .75 + h(2.4)*.35, h(3.8));
+    break;
+  case "houses":
+    add("house", .3, 7 + h(4.6)*6, .9 + h(5.2)*.3, h(7.3));
+    if(h(6.8) < .65) add("house", .75, 11 + h(8.4)*8, .8 + h(9.9)*.3, h(2.6));
+    break;
+  case "industry":
+    add(h(3.3) < .5 ? "chimney" : "tankfarm", .5, 11 + h(5.8)*8, 1, h(4.9));
+    break;
+  case "funfair":
+    add(h(4.4) < .35 ? "bigtop" : "ferris", .5, 13 + h(6.9)*6, 1, h(2.3));
+    break;
+  case "windfarm":
+    add("turbine", .5, 15 + h(7.2)*14, .9 + h(3.4)*.35, h(6.7));
+    break;
+  case "forest":
+    for(let k=0;k<3;k++) add(hsh(sp*3.3+k) < .3 ? "pine" : "tree",
+                             hsh(sp*7.1+k), 4 + hsh(sp*9.2+k)*20, .9 + hsh(sp*4.6+k)*.6, hsh(sp*11.4+k));
+    break;
+  case "palms":
+    add("palm", .28 + h(5.4)*.4, 5 + h(3.6)*10, .9 + h(7.1)*.4, h(1.9));
+    if(h(4.2) < .55) add("palm", .82, 9 + h(6.3)*8, .8 + h(2.8)*.4, h(5.7));
+    break;
+  case "campsite":
+    add(h(2.7) < .5 ? "camptent" : "campervan", .3 + h(6.4)*.4, 4 + h(4.8)*8, 1, h(9.6));
+    if(h(5.9) < .45) add("fire", .8, 6 + h(3.2)*6, 1, h(7.9));
+    break;
+  case "rocks":
+    for(let k=0;k<2;k++) add("rock", hsh(sp*6.2+k), 4 + hsh(sp*8.3+k)*16, 1.2 + hsh(sp*2.4+k)*1.2, hsh(sp*13.1+k));
+    break;
+  case "lighthouse":
+    if(h(2.1) < .35) add("lighth", .5, 16 + h(4.3)*8, 1, h(9.4));
+    else             add("rock", h(5.6), 6 + h(6.5)*10, 1 + h(3.7)*.9, h(1.4));
+    break;
+  case "harbor":
+    add(h(3.5) < .5 ? "crane" : "containers", .5, 4 + h(5.1)*4, 1, h(6.9));
+    break;
+  case "beach":
+    if(h(4.9) < .35) add("parasol", h(7.6), 6 + h(2.5)*9, 1, h(8.3));
+    break;
+  case "lake":
+    if(h(6.2) < .25) add("boat", .5, 24 + h(3.1)*16, 1, h(5.2));
+    break;
+  case "field":
+    if(h(3.9) < .28) add("bale", h(6.1), 8 + h(7.4)*14, 1, h(8.5));
+    break;
+  }
+  return out;
+}
+
+
+/* =====================================================================
+   TRACKSIDE PROPS — world-space scenery outside the kerbs, themed per
+   terrain and deterministic per space (so the same bush is always on
+   the same brow, lap after lap). Marshal tents spawn before corners.
+   Spaces claimed by a track's `trackside` declarations get that feature
+   instead of the random scenery on the claimed side.
+   ===================================================================== */
+let PROPC = { track:null, terr:"", bySp:null };
+function propCache(){
+  const terr = (typeof TRACK !== "undefined" && TRACK && TRACK.terrain) || "oval";
+  if(PROPC.track === TRACK && PROPC.terr === terr && PROPC.bySp) return PROPC;
+  const TS = tracksideCache();
+  const conf = (FP_TERRAIN[terr] || FP_TERRAIN.oval).props || [["tree",1]];
+  const totW = conf.reduce((s,c)=>s+c[1], 0) || 1;
+  const bySp = new Map();
+  const put  = (sp,p)=>{ const a=bySp.get(sp)||[]; a.push(p); bySp.set(sp,a); };
+  for(let sp=0; sp<S; sp++){
+    for(const side of [-1,1]){
+      const tsKind = (side < 0 ? TS.in : TS.out).get(sp);
+      if(tsKind){                                            // declared feature owns this side
+        for(const p of tsProps(sp, side, tsKind)) put(sp, p);
+        continue;
+      }
+      if(hsh(sp*7.31 + side*13.7) > 0.42) continue;          // density gate
+      let pick = hsh(sp*3.17 + side*5.5)*totW, kind = conf[0][0];
+      for(const [k,w] of conf){ if(pick < w){ kind=k; break; } pick -= w; }
+      put(sp, { side, kind,
+                frac: hsh(sp*9.1 + side),                    // where in the space
+                lat : 8 + hsh(sp*4.7 + side*2.3)*22,         // beyond the gravel strip
+                sc  : 0.8 + hsh(sp*6.3 + side*8.8)*0.7,
+                r   : hsh(sp*11.7 + side*3.9) });
+    }
+  }
+  /* a white marshal tent shortly before every corner — on a free side */
+  try{
+    const seen = new Set();
+    for(const c of cornerTotals()){
+      const sp = ((phys(Math.floor(c) - 2))%S+S)%S;
+      if(seen.has(sp)) continue; seen.add(sp);
+      let side = hsh(sp*2.2) < .5 ? -1 : 1;
+      if((side < 0 ? TS.in : TS.out).get(sp)) side = -side;   // that side is claimed — try the other
+      if((side < 0 ? TS.in : TS.out).get(sp)) continue;       // both claimed — skip the tent
+      put(sp, { side, kind:"tent",
+                frac:.5, lat:9, sc:1.05, r:hsh(sp) });
+    }
+  }catch(_){}
+  PROPC = { track:TRACK, terr, bySp };
+  return PROPC;
+}
+
+/* one prop billboard. (x,y) = base on the ground, u = screen px per world
+   unit at that depth (road half-width is 19u for scale), r = 0..1 variant */
+function drawProp(g, kind, x, y, u, r){
+  switch(kind){
+  case "tree":{
+    const th = (7+r*3)*u, cw = (6.5+r*2)*u;
+    g.strokeStyle="#3a2c1c"; g.lineWidth=Math.max(1, 1.5*u); g.lineCap="round";
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x, y-th); g.stroke();
+    g.fillStyle = r<.5 ? "#2e4a26" : "#3a5c30";
+    g.beginPath(); g.arc(x, y-th-cw*0.55, cw*0.75, 0, 7); g.fill();
+    g.fillStyle = r<.5 ? "#3a5c30" : "#456b38";
+    g.beginPath(); g.arc(x-cw*0.4, y-th-cw*0.30, cw*0.5, 0, 7);
+    g.arc(x+cw*0.4, y-th-cw*0.34, cw*0.52, 0, 7); g.fill();
+    break; }
+  case "pine":{
+    const th=(9+r*5)*u, cw=(5+r*2)*u, snow = fpTerrain().sil.snow;
+    g.strokeStyle="#33261a"; g.lineWidth=Math.max(1, 1.3*u);
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x, y-th*0.35); g.stroke();
+    g.fillStyle="#26402a";
+    for(let k=0;k<3;k++){
+      const ty=y-th*(0.30+k*0.24), w2=cw*(1-k*0.26);
+      g.beginPath(); g.moveTo(x-w2, ty); g.lineTo(x+w2, ty); g.lineTo(x, ty-th*0.32);
+      g.closePath(); g.fill();
+    }
+    if(snow){ g.strokeStyle=snow; g.lineWidth=Math.max(1, 1.2*u);
+      g.beginPath(); g.moveTo(x-cw*0.8, y-th*0.52); g.lineTo(x, y-th*0.86);
+      g.lineTo(x+cw*0.8, y-th*0.52); g.stroke(); }
+    break; }
+  case "cactus":{
+    const ch=(6+r*5)*u, cw=Math.max(1.4, ch*0.16);
+    g.fillStyle="#3f5a2e"; g.strokeStyle="#2c4020"; g.lineWidth=Math.max(1, 0.8*u);
+    const arm=(ax,ah)=>{ g.fillRect(ax, y-ch*0.55, cw*0.8, cw*0.8);
+                         g.fillRect(ax, y-ch*0.55-ah, cw*0.8, ah); };
+    g.fillRect(x-cw/2, y-ch, cw, ch); g.strokeRect(x-cw/2, y-ch, cw, ch);
+    arm(x-cw*1.7, ch*0.28); arm(x+cw*0.9, ch*0.22);
+    break; }
+  case "rock": case "snowrock":{
+    const rh=(2.5+r*2.5)*u, rw=rh*(1.4+r*0.6);
+    g.fillStyle = kind==="snowrock" ? "#b9c9d6" : "#6d6862";
+    g.beginPath(); g.moveTo(x-rw, y); g.lineTo(x-rw*0.5, y-rh);
+    g.lineTo(x+rw*0.35, y-rh*(0.75+r*0.3)); g.lineTo(x+rw, y);
+    g.closePath(); g.fill();
+    g.fillStyle = kind==="snowrock" ? "#e9f2f8" : "#8a847c";
+    g.beginPath(); g.moveTo(x-rw*0.5, y-rh); g.lineTo(x+rw*0.35, y-rh*(0.75+r*0.3));
+    g.lineTo(x+rw*0.1, y-rh*0.35); g.closePath(); g.fill();
+    break; }
+  case "bush": case "drybush":{
+    const bw=(3+r*2)*u;
+    g.fillStyle = kind==="drybush" ? "#5c5630" : "#33502a";
+    g.beginPath(); g.ellipse(x, y-bw*0.35, bw, bw*0.55, 0, 0, 7); g.fill();
+    break; }
+  case "acacia":{
+    const th=(7+r*3)*u, cw=(8+r*4)*u;
+    g.strokeStyle="#41301e"; g.lineWidth=Math.max(1, 1.2*u); g.lineCap="round";
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x+cw*0.08, y-th); g.stroke();
+    g.beginPath(); g.moveTo(x+cw*0.04, y-th*0.6); g.lineTo(x-cw*0.25, y-th*0.9); g.stroke();
+    g.fillStyle="#3c4a24";
+    g.beginPath(); g.ellipse(x, y-th, cw*0.7, (1.4+r)*u, 0, 0, 7); g.fill();
+    break; }
+  case "post":{
+    const ph=(3+r)*u;
+    g.fillStyle="#7a6a4c"; g.fillRect(x-0.4*u, y-ph, Math.max(1, 0.8*u), ph);
+    break; }
+  case "barn":{
+    const bw=(9+r*3)*u, bh=(5+r*1.5)*u;
+    g.fillStyle="#8c3a2e"; g.fillRect(x-bw/2, y-bh, bw, bh);
+    g.fillStyle="#5e2620";
+    g.beginPath(); g.moveTo(x-bw*0.58, y-bh); g.lineTo(x, y-bh-bw*0.30);
+    g.lineTo(x+bw*0.58, y-bh); g.closePath(); g.fill();
+    g.fillStyle="#3a2320"; g.fillRect(x-bw*0.12, y-bh*0.6, bw*0.24, bh*0.6);
+    break; }
+  case "lamp":{
+    const lh=(11+r*2)*u;
+    g.strokeStyle="#8a8f98"; g.lineWidth=Math.max(1, 0.9*u); g.lineCap="round";
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x, y-lh);
+    g.lineTo(x + 2.4*u, y-lh+0.6*u); g.stroke();
+    const gl = g.createRadialGradient(x+2.4*u, y-lh+1.2*u, 0.3*u, x+2.4*u, y-lh+1.2*u, 3.4*u);
+    gl.addColorStop(0,"rgba(255,214,130,.85)"); gl.addColorStop(1,"rgba(255,214,130,0)");
+    g.fillStyle=gl; g.beginPath(); g.arc(x+2.4*u, y-lh+1.2*u, 3.4*u, 0, 7); g.fill();
+    g.fillStyle="#ffe9b8"; g.beginPath(); g.arc(x+2.4*u, y-lh+1.2*u, 0.8*u, 0, 7); g.fill();
+    break; }
+  case "block":{
+    const bw=(10+r*6)*u, bh=(12+r*10)*u;
+    g.fillStyle="#3a3f4c"; g.fillRect(x-bw/2, y-bh, bw, bh);
+    g.fillStyle="#2c313c"; g.fillRect(x+bw*0.28, y-bh, bw*0.22, bh);
+    if(u > 0.8){
+      g.fillStyle="rgba(255,214,130,.55)";
+      for(let wy=0; wy<4; wy++) for(let wx=0; wx<2; wx++){
+        if(hsh(r*97 + wy*3.1 + wx) < 0.5) continue;
+        g.fillRect(x-bw*0.34+wx*bw*0.3, y-bh+ (1.5+wy*2.6)*u, 1.1*u, 1.4*u);
+      }
+    }
+    break; }
+  case "panel":{
+    const pw=(9+r*2)*u, ph2=(4.5+r)*u, py=y-(5+r*2)*u;
+    g.strokeStyle="#8b8577"; g.lineWidth=Math.max(1, 0.9*u);
+    g.beginPath(); g.moveTo(x-pw*0.32, y); g.lineTo(x-pw*0.32, py);
+    g.moveTo(x+pw*0.32, y); g.lineTo(x+pw*0.32, py); g.stroke();
+    g.fillStyle="#efe6d4"; g.fillRect(x-pw/2, py-ph2, pw, ph2);
+    g.strokeStyle="#c8322c"; g.lineWidth=Math.max(1, 0.7*u);
+    g.strokeRect(x-pw/2, py-ph2, pw, ph2);
+    if(u > 1.1){
+      g.fillStyle="#c8322c"; g.font=`900 ${Math.max(5, 2.6*u)}px var(--mono, monospace)`;
+      g.textAlign="center"; g.textBaseline="middle";
+      g.fillText("HEAT", x, py-ph2/2);
+    }
+    break; }
+  case "tent":{
+    const tw=(8+r*2)*u, th2=(4+r)*u;
+    g.fillStyle="#efe9dd";
+    g.fillRect(x-tw/2, y-th2, tw, th2);
+    g.beginPath(); g.moveTo(x-tw*0.58, y-th2); g.lineTo(x, y-th2-tw*0.28);
+    g.lineTo(x+tw*0.58, y-th2); g.closePath(); g.fill();
+    g.fillStyle="#c9c2b2";
+    g.beginPath(); g.moveTo(x, y-th2-tw*0.28); g.lineTo(x+tw*0.58, y-th2);
+    g.lineTo(x+tw*0.5, y); g.lineTo(x+tw*0.1, y); g.closePath(); g.fill();
+    g.fillStyle="#57506a"; g.fillRect(x-tw*0.14, y-th2*0.7, tw*0.28, th2*0.7);
+    break; }
+
+  /* ---------- trackside-feature props (declared via TRACK.trackside) ---------- */
+  case "stand":{                                  // grandstand packed with fans
+    const w=30*u, hgt=9.5*u;
+    g.fillStyle="#4a453e"; g.fillRect(x-w/2, y-hgt*0.9, w, hgt*0.9);      // frame
+    for(let t3=0; t3<3; t3++){                                            // seating tiers
+      const ty = y - hgt*(0.22 + t3*0.24), th3 = hgt*0.2;
+      g.fillStyle = t3%2 ? "#5b554c" : "#544e46";
+      g.fillRect(x-w/2, ty-th3, w, th3);
+      tsCrowd(g, x, ty-th3*0.15, w*0.94, th3*0.85, r*97 + t3*13, u);
+    }
+    g.fillStyle="#e9e2d1";                                                // roof canopy
+    g.beginPath(); g.moveTo(x-w*0.56, y-hgt*0.92); g.lineTo(x+w*0.56, y-hgt*0.92);
+    g.lineTo(x+w*0.5, y-hgt*1.1); g.lineTo(x-w*0.5, y-hgt*1.1); g.closePath(); g.fill();
+    g.strokeStyle="#8a8577"; g.lineWidth=Math.max(1, 0.7*u);
+    g.beginPath(); g.moveTo(x-w*0.46, y); g.lineTo(x-w*0.46, y-hgt*0.92);
+    g.moveTo(x+w*0.46, y); g.lineTo(x+w*0.46, y-hgt*0.92); g.stroke();
+    for(const fx2 of [-0.35, 0.1, 0.4]){                                  // flags on the roof
+      const px2 = x + w*fx2;
+      g.strokeStyle="#8a8577"; g.beginPath(); g.moveTo(px2, y-hgt*1.1); g.lineTo(px2, y-hgt*1.36); g.stroke();
+      g.fillStyle = hsh(r*31+fx2*9) < .5 ? "#c8322c" : "#3f7d8c";
+      g.beginPath(); g.moveTo(px2, y-hgt*1.36); g.lineTo(px2+3.2*u, y-hgt*1.31);
+      g.lineTo(px2, y-hgt*1.26); g.closePath(); g.fill();
+    }
+    break; }
+  case "bank":{                                   // spectators on a grass bank
+    const w=(26+r*6)*u, hgt=(4.5+r*1.5)*u;
+    g.fillStyle="#4c6134";
+    g.beginPath(); g.ellipse(x, y, w/2, hgt, 0, Math.PI, 0); g.fill();
+    tsCrowd(g, x, y-hgt*0.25, w*0.8, hgt*0.9, r*61, u);
+    const px2 = x + (r-0.5)*w*0.5;
+    g.strokeStyle="#8a8577"; g.lineWidth=Math.max(1, 0.6*u);
+    g.beginPath(); g.moveTo(px2, y-hgt); g.lineTo(px2, y-hgt-4.5*u); g.stroke();
+    g.fillStyle="#d8c23a";
+    g.beginPath(); g.moveTo(px2, y-hgt-4.5*u); g.lineTo(px2+3.4*u, y-hgt-3.9*u);
+    g.lineTo(px2, y-hgt-3.3*u); g.closePath(); g.fill();
+    break; }
+  case "pitbox":{                                 // pit garage + crew + tyres
+    const w=27*u, hgt=7.5*u;
+    g.fillStyle="#d9d2c2"; g.fillRect(x-w/2, y-hgt, w, hgt);
+    g.fillStyle="#221e28"; g.fillRect(x-w*0.30, y-hgt*0.74, w*0.60, hgt*0.74);  // open door
+    g.fillStyle="#c8322c"; g.fillRect(x-w/2, y-hgt, w, hgt*0.2);                // sign strip
+    if(u > 1.0){
+      g.fillStyle="#f2ead8"; g.font=`900 ${Math.max(5, 2.4*u)}px var(--mono, monospace)`;
+      g.textAlign="center"; g.textBaseline="middle";
+      g.fillText("PIT " + (1+((r*9)|0)), x, y-hgt*0.9);
+    }
+    g.fillStyle="#1d1a22";                                                       // tyre stack
+    for(let k=0;k<3;k++){ g.beginPath(); g.arc(x-w*0.40, y-(0.9+k*1.5)*u, 1.15*u, 0, 7); g.fill(); }
+    tsCrowd(g, x+w*0.36, y, 4*u, 2.2*u, r*43, u);                                // crew
+    break; }
+  case "hoard":{                                  // sponsor hoardings, wall to wall
+    const w=32*u, hgt=4.6*u, py=y-1.2*u;
+    g.strokeStyle="#8b8577"; g.lineWidth=Math.max(1, 0.8*u);
+    for(const fx2 of [-0.4, 0, 0.4]){ g.beginPath(); g.moveTo(x+w*fx2, y); g.lineTo(x+w*fx2, py); g.stroke(); }
+    const pals = [["#efe6d4","#c8322c"],["#151824","#d8c23a"],["#1e4e46","#e9e2d1"],["#3f2a5a","#e08a3c"]];
+    const n2 = 3;
+    for(let k=0;k<n2;k++){
+      const [bgc, fgc] = pals[(hsh(r*17+k*3.7)*pals.length)|0];
+      const bx = x - w/2 + (w/n2)*k;
+      g.fillStyle=bgc; g.fillRect(bx, py-hgt, w/n2 - 0.4*u, hgt);
+      if(u > 0.9){
+        g.fillStyle=fgc; g.font=`900 ${Math.max(4, 2.1*u)}px var(--mono, monospace)`;
+        g.textAlign="center"; g.textBaseline="middle";
+        g.fillText(["HEAT","REVUP","GAS","TYRE","OIL","V12"][(hsh(r*29+k*5.1)*6)|0], bx + w/(2*n2), py-hgt/2);
+      }
+    }
+    break; }
+  case "wallseg":{                                // concrete wall + catch fence
+    const w=32*u, wh=2.4*u, fh=4.6*u;
+    g.fillStyle="#a8a294"; g.fillRect(x-w/2, y-wh, w, wh);
+    g.fillStyle="#8f897b"; g.fillRect(x-w/2, y-wh, w, wh*0.3);
+    g.strokeStyle="rgba(90,86,78,.9)"; g.lineWidth=Math.max(1, 0.5*u);
+    for(let k=0;k<5;k++){ const px2=x-w/2+w*(k+0.5)/5;
+      g.beginPath(); g.moveTo(px2, y-wh); g.lineTo(px2, y-wh-fh); g.stroke(); }
+    g.strokeStyle="rgba(120,116,106,.55)"; g.lineWidth=Math.max(1, 0.35*u);
+    for(let k=1;k<3;k++){ const yy=y-wh-fh*k/3;
+      g.beginPath(); g.moveTo(x-w/2, yy); g.lineTo(x+w/2, yy); g.stroke(); }
+    break; }
+  case "flood":{                                  // floodlight mast
+    const lh=(15+r*3)*u;
+    g.strokeStyle="#8a8f98"; g.lineWidth=Math.max(1, 1.0*u); g.lineCap="round";
+    g.beginPath(); g.moveTo(x-0.8*u, y); g.lineTo(x, y-lh); g.lineTo(x+0.8*u, y); g.stroke();
+    const gl = g.createRadialGradient(x, y-lh, 0.5*u, x, y-lh, 6*u);
+    gl.addColorStop(0,"rgba(240,246,255,.8)"); gl.addColorStop(1,"rgba(240,246,255,0)");
+    g.fillStyle=gl; g.beginPath(); g.arc(x, y-lh, 6*u, 0, 7); g.fill();
+    g.fillStyle="#2c3038"; g.fillRect(x-2.4*u, y-lh-1.8*u, 4.8*u, 2.4*u);
+    g.fillStyle="#f4f8ff";
+    for(let ry2=0; ry2<2; ry2++) for(let rx2=0; rx2<4; rx2++)
+      g.fillRect(x-2.0*u+rx2*1.1*u, y-lh-1.4*u+ry2*1.1*u, 0.7*u, 0.7*u);
+    break; }
+  case "truck":{                                  // team transporter
+    const w=20*u, hgt=6.5*u;
+    g.fillStyle = r<.5 ? "#e6e0d0" : "#4a5a8a";
+    g.fillRect(x-w/2, y-hgt, w*0.78, hgt);                                 // trailer
+    g.fillStyle = r<.5 ? "#c8322c" : "#d8c23a";
+    g.fillRect(x-w/2, y-hgt*0.62, w*0.78, hgt*0.18);                       // livery stripe
+    g.fillStyle="#39424e"; g.fillRect(x+w*0.30, y-hgt*0.62, w*0.20, hgt*0.62);   // cab
+    g.fillStyle="#9fb6c9"; g.fillRect(x+w*0.33, y-hgt*0.56, w*0.13, hgt*0.2);    // windscreen
+    g.fillStyle="#141117";
+    for(const fx2 of [-0.36, -0.18, 0.12, 0.38]){
+      g.beginPath(); g.arc(x+w*fx2, y, 1.1*u, 0, 7); g.fill(); }
+    break; }
+  case "parked":{                                 // a parked road car
+    const w=6.5*u, hgt=2.4*u;
+    const cols=["#8a2f2a","#2f4e8a","#c9c3b2","#3c5a34","#5a5a62","#b0762f"];
+    g.fillStyle="rgba(0,0,0,.3)";
+    g.beginPath(); g.ellipse(x, y, w*0.55, 0.5*u, 0, 0, 7); g.fill();
+    g.fillStyle=cols[(r*cols.length)|0];
+    rr(g, x-w/2, y-hgt, w, hgt, 0.8*u);
+    g.fillStyle="#1b2530"; rr(g, x-w*0.28, y-hgt*0.95, w*0.56, hgt*0.5, 0.5*u);
+    g.fillStyle="#141117";
+    g.beginPath(); g.arc(x-w*0.30, y, 0.55*u, 0, 7); g.arc(x+w*0.30, y, 0.55*u, 0, 7); g.fill();
+    break; }
+  case "towerblk":{                               // city tower, lit windows
+    const bw=(9+r*5)*u, bh=(16+r*12)*u;
+    g.fillStyle="#3a3f4c"; g.fillRect(x-bw/2, y-bh, bw, bh);
+    g.fillStyle="#2c313c"; g.fillRect(x+bw*0.26, y-bh, bw*0.24, bh);
+    g.fillStyle="#4a5060"; g.fillRect(x-bw/2, y-bh, bw, 0.9*u);
+    if(u > 0.7){
+      g.fillStyle="rgba(255,214,130,.6)";
+      for(let wy=0; wy<6; wy++) for(let wx=0; wx<3; wx++){
+        if(hsh(r*97 + wy*3.1 + wx*1.7) < 0.45) continue;
+        g.fillRect(x-bw*0.36+wx*bw*0.26, y-bh+(1.6+wy*2.3)*u, 1.0*u, 1.3*u);
+      }
+    }
+    g.strokeStyle="#8a8f98"; g.lineWidth=Math.max(1, 0.5*u);
+    g.beginPath(); g.moveTo(x, y-bh); g.lineTo(x, y-bh-2.4*u); g.stroke();
+    break; }
+  case "house":{                                  // pitched-roof house
+    const bw=(8+r*2)*u, bh=(4+r)*u;
+    g.fillStyle = r<.5 ? "#c9b89a" : "#b09a7d";
+    g.fillRect(x-bw/2, y-bh, bw, bh);
+    g.fillStyle="#7a4636";
+    g.beginPath(); g.moveTo(x-bw*0.58, y-bh); g.lineTo(x, y-bh-bw*0.34);
+    g.lineTo(x+bw*0.58, y-bh); g.closePath(); g.fill();
+    g.fillStyle="#4a3a30"; g.fillRect(x-bw*0.1, y-bh*0.62, bw*0.2, bh*0.62);      // door
+    g.fillStyle="rgba(255,214,130,.7)"; g.fillRect(x+bw*0.2, y-bh*0.7, bw*0.16, bh*0.3);
+    if(r < .4){ g.fillStyle="#8f897b"; g.fillRect(x+bw*0.3, y-bh-bw*0.3, bw*0.1, bw*0.18); }
+    break; }
+  case "chimney":{                                // factory hall + smokestack
+    const bw=(11+r*4)*u, bh=(5+r*1.5)*u;
+    g.fillStyle="#6c6a70"; g.fillRect(x-bw/2, y-bh, bw, bh);
+    g.fillStyle="#5b595f";                                                        // sawtooth roof
+    for(let k=0;k<3;k++){
+      const bx = x-bw/2 + bw*k/3;
+      g.beginPath(); g.moveTo(bx, y-bh); g.lineTo(bx, y-bh-1.8*u);
+      g.lineTo(bx+bw/3, y-bh); g.closePath(); g.fill();
+    }
+    const sx = x+bw*0.32, sh = (10+r*4)*u;
+    g.fillStyle="#7c6a5c"; g.fillRect(sx-0.9*u, y-sh, 1.8*u, sh);
+    const tnow = (typeof performance!=="undefined" ? performance.now() : Date.now());
+    g.fillStyle="rgba(150,146,140,.4)";
+    for(let k=0;k<3;k++){
+      const t2 = ((tnow/2600 + r + k*0.33) % 1);
+      g.beginPath(); g.arc(sx + t2*4*u, y-sh - t2*7*u, (1+t2*2.4)*u, 0, 7); g.fill();
+    }
+    break; }
+  case "tankfarm":{                               // storage tanks + pipe
+    const tw=4.6*u, th3=(6+r*2)*u;
+    for(const fx2 of [-0.85, 0.35]){
+      const tx = x + fx2*tw;
+      g.fillStyle="#8f949c"; g.fillRect(tx-tw/2, y-th3, tw, th3);
+      g.fillStyle="#a8adb5";
+      g.beginPath(); g.ellipse(tx, y-th3, tw/2, 1.1*u, 0, Math.PI, 0); g.fill();
+      g.strokeStyle="#6d7178"; g.lineWidth=Math.max(1, 0.4*u);
+      g.beginPath(); g.moveTo(tx-tw/2, y-th3*0.5); g.lineTo(tx+tw/2, y-th3*0.5); g.stroke();
+    }
+    g.strokeStyle="#6d7178"; g.lineWidth=Math.max(1, 0.6*u);
+    g.beginPath(); g.moveTo(x-tw*1.3, y-1.4*u); g.lineTo(x+tw*0.9, y-1.4*u); g.stroke();
+    break; }
+  case "palm":{                                   // leaning palm
+    const th3=(8+r*4)*u, lean=(r-0.5)*4*u;
+    g.strokeStyle="#6a5638"; g.lineWidth=Math.max(1, 1.1*u); g.lineCap="round";
+    g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x+lean*0.4, y-th3*0.6, x+lean, y-th3); g.stroke();
+    const cx2 = x+lean, cy2 = y-th3;
+    g.strokeStyle="#3f6b35"; g.lineWidth=Math.max(1, 0.9*u);
+    for(let k=0;k<6;k++){
+      const a2 = -Math.PI*0.15 - k*(Math.PI*0.7/5) + (r-0.5)*0.3;
+      g.beginPath(); g.moveTo(cx2, cy2);
+      g.quadraticCurveTo(cx2+Math.cos(a2)*4.4*u, cy2+Math.sin(a2)*4.4*u - 1.2*u,
+                         cx2+Math.cos(a2)*6.4*u, cy2+Math.sin(a2)*6.4*u + 1.6*u);
+      g.stroke();
+    }
+    g.fillStyle="#5a4a2c";
+    g.beginPath(); g.arc(cx2-0.7*u, cy2+0.6*u, 0.55*u, 0, 7); g.arc(cx2+0.7*u, cy2+0.7*u, 0.55*u, 0, 7); g.fill();
+    break; }
+  case "bale":{                                   // round hay bale
+    const bw=2.6*u;
+    g.fillStyle="#c9a94f"; g.beginPath(); g.arc(x, y-bw, bw, 0, 7); g.fill();
+    g.strokeStyle="#a3853a"; g.lineWidth=Math.max(1, 0.4*u);
+    g.beginPath(); g.arc(x, y-bw, bw*0.6, 0, 7); g.stroke();
+    break; }
+  case "camptent":{                               // little dome tent
+    const tw=(4.5+r)*u, th3=(2.6+r*0.6)*u;
+    g.fillStyle = r<.33 ? "#b0552f" : r<.66 ? "#3f6b8a" : "#4c7d46";
+    g.beginPath(); g.moveTo(x-tw/2, y); g.quadraticCurveTo(x, y-th3*1.8, x+tw/2, y); g.closePath(); g.fill();
+    g.fillStyle="rgba(20,16,22,.7)";
+    g.beginPath(); g.moveTo(x-tw*0.14, y); g.quadraticCurveTo(x, y-th3*0.9, x+tw*0.14, y); g.closePath(); g.fill();
+    break; }
+  case "campervan":{                              // campervan
+    const w=8*u, hgt=3.6*u;
+    g.fillStyle="#e9e2d1"; rr(g, x-w/2, y-hgt, w, hgt, 0.9*u);
+    g.fillStyle = r<.5 ? "#c8664a" : "#5f8a8c";
+    g.fillRect(x-w/2, y-hgt*0.5, w, hgt*0.22);
+    g.fillStyle="#9fb6c9"; g.fillRect(x-w*0.34, y-hgt*0.9, w*0.26, hgt*0.3);
+    g.fillRect(x+w*0.1, y-hgt*0.9, w*0.2, hgt*0.3);
+    g.fillStyle="#141117";
+    g.beginPath(); g.arc(x-w*0.28, y, 0.7*u, 0, 7); g.arc(x+w*0.28, y, 0.7*u, 0, 7); g.fill();
+    break; }
+  case "fire":{                                   // campfire, flickering
+    const tnow = (typeof performance!=="undefined" ? performance.now() : Date.now());
+    const fl = 0.8 + 0.3*Math.sin(tnow/110 + r*20);
+    const gl = g.createRadialGradient(x, y-1*u, 0.3*u, x, y-1*u, 4.5*u);
+    gl.addColorStop(0,"rgba(255,170,80,.55)"); gl.addColorStop(1,"rgba(255,170,80,0)");
+    g.fillStyle=gl; g.beginPath(); g.arc(x, y-1*u, 4.5*u, 0, 7); g.fill();
+    g.strokeStyle="#4a3626"; g.lineWidth=Math.max(1, 0.6*u);
+    g.beginPath(); g.moveTo(x-1.4*u, y); g.lineTo(x+1.4*u, y-0.5*u);
+    g.moveTo(x-1.3*u, y-0.5*u); g.lineTo(x+1.3*u, y); g.stroke();
+    g.fillStyle="#ffb45a";
+    g.beginPath(); g.moveTo(x-1*u, y); g.quadraticCurveTo(x-0.3*u, y-2.4*u*fl, x, y-2.9*u*fl);
+    g.quadraticCurveTo(x+0.4*u, y-2*u*fl, x+1*u, y); g.closePath(); g.fill();
+    g.fillStyle="#ffe08a";
+    g.beginPath(); g.moveTo(x-0.5*u, y); g.quadraticCurveTo(x, y-1.6*u*fl, x+0.5*u, y); g.closePath(); g.fill();
+    break; }
+  case "bigtop":{                                 // striped circus tent
+    const tw=(11+r*3)*u, th3=(6+r*2)*u;
+    g.fillStyle="#c8564a";
+    g.beginPath(); g.moveTo(x-tw/2, y); g.lineTo(x-tw*0.32, y-th3*0.66); g.lineTo(x+tw*0.32, y-th3*0.66);
+    g.lineTo(x+tw/2, y); g.closePath(); g.fill();
+    g.fillStyle="#efe6d4";
+    for(let k=-2;k<=2;k+=2){
+      g.beginPath(); g.moveTo(x+k*tw*0.17, y); g.lineTo(x+k*tw*0.1, y-th3*0.66);
+      g.lineTo(x+(k*0.1+0.09)*tw, y-th3*0.66); g.lineTo(x+(k*0.17+0.12)*tw, y); g.closePath(); g.fill();
+    }
+    g.fillStyle="#c8564a";
+    g.beginPath(); g.moveTo(x-tw*0.34, y-th3*0.64); g.lineTo(x, y-th3*1.1);
+    g.lineTo(x+tw*0.34, y-th3*0.64); g.closePath(); g.fill();
+    g.strokeStyle="#8a8577"; g.beginPath(); g.moveTo(x, y-th3*1.1); g.lineTo(x, y-th3*1.32); g.stroke();
+    g.fillStyle="#d8c23a";
+    g.beginPath(); g.moveTo(x, y-th3*1.32); g.lineTo(x+2.6*u, y-th3*1.26); g.lineTo(x, y-th3*1.2);
+    g.closePath(); g.fill();
+    break; }
+  case "ferris":{                                 // big wheel, slowly turning
+    const R2=(7+r*2)*u, cy2=y-R2-2.5*u;
+    const tnow = (typeof performance!=="undefined" ? performance.now() : Date.now());
+    const a0 = tnow/4200 + r*7;
+    g.strokeStyle="#8a8f98"; g.lineWidth=Math.max(1, 0.8*u);
+    g.beginPath(); g.moveTo(x-R2*0.5, y); g.lineTo(x, cy2); g.lineTo(x+R2*0.5, y); g.stroke();
+    g.strokeStyle="#aab0ba"; g.lineWidth=Math.max(1, 0.6*u);
+    g.beginPath(); g.arc(x, cy2, R2, 0, 7); g.stroke();
+    const cols=["#c8564a","#d8c23a","#5f8a8c","#8a5cf6","#4c7d46","#e08a3c"];
+    for(let k=0;k<8;k++){
+      const a2 = a0 + k*Math.PI/4;
+      const sx = x+Math.cos(a2)*R2, sy = cy2+Math.sin(a2)*R2;
+      g.beginPath(); g.moveTo(x, cy2); g.lineTo(sx, sy); g.stroke();
+      g.fillStyle=cols[k%cols.length];
+      g.fillRect(sx-0.9*u, sy, 1.8*u, 1.4*u);
+    }
+    break; }
+  case "turbine":{                                // wind turbine, blades turning
+    const th3=(14+r*4)*u;
+    const tnow = (typeof performance!=="undefined" ? performance.now() : Date.now());
+    const a0 = tnow/1400 + r*9;
+    g.strokeStyle="#d8dde3"; g.lineWidth=Math.max(1, 1.0*u); g.lineCap="round";
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x, y-th3); g.stroke();
+    g.fillStyle="#c3c9d0"; g.fillRect(x-1.1*u, y-th3-0.8*u, 2.2*u, 1.6*u);
+    g.strokeStyle="#e9edf2"; g.lineWidth=Math.max(1, 0.8*u);
+    for(let k=0;k<3;k++){
+      const a2 = a0 + k*Math.PI*2/3;
+      g.beginPath(); g.moveTo(x, y-th3);
+      g.lineTo(x+Math.cos(a2)*6.5*u, y-th3+Math.sin(a2)*6.5*u); g.stroke();
+    }
+    break; }
+  case "lighth":{                                 // banded lighthouse
+    const th3=(13+r*3)*u, bw=3.4*u;
+    for(let k=0;k<4;k++){
+      g.fillStyle = k%2 ? "#c8322c" : "#efe6d4";
+      const y1 = y - th3*(k+1)/4, hh = th3/4;
+      const w1 = bw*(1 - k*0.09), w0 = bw*(1 - (k+1)*0.09);
+      g.beginPath(); g.moveTo(x-w1/2, y1+hh); g.lineTo(x+w1/2, y1+hh);
+      g.lineTo(x+w0/2, y1); g.lineTo(x-w0/2, y1); g.closePath(); g.fill();
+    }
+    g.fillStyle="#2c3038"; g.fillRect(x-1.3*u, y-th3-1.8*u, 2.6*u, 1.8*u);
+    const gl = g.createRadialGradient(x, y-th3-0.9*u, 0.3*u, x, y-th3-0.9*u, 4*u);
+    gl.addColorStop(0,"rgba(255,236,170,.9)"); gl.addColorStop(1,"rgba(255,236,170,0)");
+    g.fillStyle=gl; g.beginPath(); g.arc(x, y-th3-0.9*u, 4*u, 0, 7); g.fill();
+    break; }
+  case "crane":{                                  // harbour gantry crane
+    const th3=(11+r*3)*u, jib=(9+r*3)*u;
+    g.strokeStyle="#b0762f"; g.lineWidth=Math.max(1, 1.0*u); g.lineCap="round";
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x, y-th3); g.stroke();
+    g.beginPath(); g.moveTo(x-jib*0.35, y-th3); g.lineTo(x+jib*0.65, y-th3); g.stroke();
+    g.strokeStyle="#8a6a2c"; g.lineWidth=Math.max(1, 0.45*u);
+    g.beginPath(); g.moveTo(x, y-th3-2*u); g.lineTo(x+jib*0.6, y-th3);
+    g.moveTo(x, y-th3-2*u); g.lineTo(x-jib*0.3, y-th3); g.stroke();
+    g.beginPath(); g.moveTo(x+jib*0.5, y-th3); g.lineTo(x+jib*0.5, y-th3*0.45); g.stroke();
+    g.fillStyle="#5f7d8a"; g.fillRect(x+jib*0.5-1.2*u, y-th3*0.45, 2.4*u, 1.5*u);   // hanging box
+    g.fillStyle="#8f949c"; g.fillRect(x-1.6*u, y-th3, 1.6*u, 1.6*u);                // counterweight
+    break; }
+  case "containers":{                             // container stack
+    const cw=6*u, ch=2.2*u;
+    const cols=["#8a2f2a","#2f4e8a","#3c5a34","#b0762f","#5a5a62"];
+    for(let row=0; row<2; row++) for(let col=0; col<2; col++){
+      if(row===1 && col===1 && r<0.5) continue;
+      g.fillStyle=cols[(hsh(r*23 + row*3 + col)*cols.length)|0];
+      const bx = x - cw + col*cw + row*cw*0.15, by = y - ch*(row+1);
+      g.fillRect(bx, by, cw-0.4*u, ch-0.25*u);
+      g.strokeStyle="rgba(0,0,0,.25)"; g.lineWidth=Math.max(1, 0.3*u);
+      for(let k=1;k<4;k++){ g.beginPath(); g.moveTo(bx+(cw-0.4*u)*k/4, by);
+        g.lineTo(bx+(cw-0.4*u)*k/4, by+ch-0.25*u); g.stroke(); }
+    }
+    break; }
+  case "parasol":{                                // beach umbrella + towel
+    const ph=(3.6+r)*u;
+    g.strokeStyle="#8a8577"; g.lineWidth=Math.max(1, 0.5*u);
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x, y-ph); g.stroke();
+    g.fillStyle = r<.5 ? "#c8564a" : "#3f7d8c";
+    g.beginPath(); g.moveTo(x-3*u, y-ph); g.quadraticCurveTo(x, y-ph-2.6*u, x+3*u, y-ph); g.closePath(); g.fill();
+    g.fillStyle="#efe6d4";
+    g.beginPath(); g.moveTo(x-2.1*u, y-ph-0.2*u); g.quadraticCurveTo(x-0.7*u, y-ph-2.2*u, x, y-ph-2.35*u);
+    g.lineTo(x-1*u, y-ph); g.closePath(); g.fill();
+    g.fillStyle = r<.5 ? "#d8c23a" : "#c95f8a";
+    g.fillRect(x+1.5*u, y-0.6*u, 3*u, 0.9*u);
+    break; }
+  case "boat":{                                   // little sailboat out on the water
+    const bw=5*u;
+    g.fillStyle="#6a4a34";
+    g.beginPath(); g.moveTo(x-bw/2, y-1*u); g.lineTo(x+bw/2, y-1*u);
+    g.lineTo(x+bw*0.32, y); g.lineTo(x-bw*0.32, y); g.closePath(); g.fill();
+    g.strokeStyle="#4a3626"; g.lineWidth=Math.max(1, 0.4*u);
+    g.beginPath(); g.moveTo(x, y-1*u); g.lineTo(x, y-5.4*u); g.stroke();
+    g.fillStyle="#efe9dd";
+    g.beginPath(); g.moveTo(x+0.3*u, y-5.2*u); g.lineTo(x+2.6*u, y-1.4*u);
+    g.lineTo(x+0.3*u, y-1.4*u); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(x-0.3*u, y-4.6*u); g.lineTo(x-2*u, y-1.4*u);
+    g.lineTo(x-0.3*u, y-1.4*u); g.closePath(); g.fill();
+    break; }
+  }
+}
+
+/* rows of tiny spectators — coloured pixel pairs inside a box */
+function tsCrowd(g, cx, baseY, w, h, seed, u){
+  const cols = ["#e0b46a","#c95f4e","#7ea0c9","#8ec98a","#d9d2bf","#b07ac9","#d98a4e"];
+  const n = Math.min(70, Math.max(6, Math.round((w*h)/(2.6*u*u + 2))));
+  for(let k=0;k<n;k++){
+    g.fillStyle = cols[(hsh(seed + k*5.3)*cols.length)|0];
+    g.fillRect(cx + (hsh(seed + k*1.7) - 0.5)*w,
+               baseY - hsh(seed + k*3.1)*h,
+               Math.max(1, 0.55*u), Math.max(1, 0.8*u));
+  }
+}
+
+
 /* =====================================================================
    TRACKSIDE PROPS — world-space scenery outside the kerbs, themed per
    terrain and deterministic per space (so the same bush is always on
