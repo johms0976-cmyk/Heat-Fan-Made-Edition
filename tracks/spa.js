@@ -7,7 +7,7 @@ const TRACK_MYTRACK = defineTrack({
   key:"mytrack",
   brief:"Insert track description for track selector screen",
   name:"Spa", spaces:94, defaultLaps:2, heat:6, stress:3,
-  image:"Spa.jpg", imgW:1200, imgH:800,
+  image:"tracks/Spa.jpg", imgW:1200, imgH:800,
   eyebrow:"Custom Grand Prix · My Circuit",
   subtitle:"Custom build",
   tagline:"Hand-built fan board",
