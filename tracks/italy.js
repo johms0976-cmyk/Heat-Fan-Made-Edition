@@ -14,7 +14,7 @@ const TRACK_ITALY = defineTrack({
   eyebrow:"Italian Grand Prix",
   subtitle:"Base Game",
   tagline:"When in Rome",
-  terrain:"oval",
+  terrain:"ruins",
   plate:{ x:-35, y:16, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"When in Roma",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:109,y:261}, podium:{x:1070,y:108},
