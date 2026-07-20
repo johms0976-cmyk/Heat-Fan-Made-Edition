@@ -17,7 +17,7 @@ const TRACK_BRITAIN = defineTrack({
   eyebrow:"British Grand Prix",
   subtitle:"Base Game",
   tagline:"",
-  terrain:"farmland",
+  terrain:"parkland",
   plate:{ x:19, y:625, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"The Palace",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:123,y:481}, podium:{x:96,y:96},
