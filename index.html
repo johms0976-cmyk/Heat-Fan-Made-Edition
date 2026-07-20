@@ -6,6 +6,13 @@
 <meta name="theme-color" content="#17141b">
 <title>HEAT - Pedal to the Metal!</title>
 
+<script>
+window.addEventListener("error", e => {
+  if (e.filename) alert("Error in " + e.filename.split("/").pop() +
+                        " line " + e.lineno + ":\n" + e.message);
+});
+</script>
+
 <!-- on-screen JS error reporter (delete this line when you no longer want it) -->
 <script src="js/diagnostic.js"></script>
 
