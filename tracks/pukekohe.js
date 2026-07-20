@@ -18,7 +18,7 @@ const TRACK_PUKEKOHE = defineTrack({
   eyebrow:"New Zealand International Grand Prix · Pukekohe",
   subtitle:"Kiwi Grand Prix",
   tagline:"New Zealand International Grand Prix — fan table, private garage build",
-  terrain:"oval",
+  terrain:"aotearoa",
   plate:{ x:875, y:655, w:300, h:115, rot:-2, title:"NEW ZEALAND GRAND PRIX", sub:"PUKEKOHE",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:666,y:263}, podium:{x:442,y:167},
