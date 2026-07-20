@@ -14,7 +14,7 @@ const TRACK_MEXICO = defineTrack({
   eyebrow:"Mexico Grand Prix",
   subtitle:"Heavy Rain Expansion!",
   tagline:"",
-  terrain:"desert",
+  terrain:"mexico",
   plate:{ x:444, y:16, w:300, h:112, rot:-2, title:"Mai-Ze-Co", sub:"Tenochtitlán speedway!",
           titleColor:"#eb4d3d", subColor:"#0f5132" },
   panel:{x:510,y:529}, podium:{x:292,y:340},
