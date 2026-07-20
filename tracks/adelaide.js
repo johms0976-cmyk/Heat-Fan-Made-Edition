@@ -18,7 +18,7 @@ const TRACK_ADELAIDE = defineTrack({
   eyebrow:"Custom Grand Prix · My Circuit",
   subtitle:"Custom build",
   tagline:"Hand-built fan board",
-  terrain:"oval",
+  terrain:"street",
   plate:{ x:397, y:876, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"MY CIRCUIT",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:681,y:462}, podium:{x:145,y:492},
