@@ -17,7 +17,7 @@ const TRACK_SOUTHAFRICA = defineTrack({
   eyebrow:"South Africa Grand Prix",
   subtitle:"Rocky Road Expansion",
   tagline:"",
-  terrain:"urban",
+  terrain:"savannah",
   plate:{ x:748, y:4, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"MY CIRCUIT",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:522,y:276}, podium:{x:88,y:89},
