@@ -1192,10 +1192,10 @@ function showRaceLoading(title, sub, done){
 const CHAMP_POINTS = [9,6,4,3,2,1,0,0];   // podium points by finishing position
 function showModeSelect(){
   const el=$("#setup"); el.onclick=null; el.style.display="flex"; el.scrollTop=0;
-  el.innerHTML=`<div class="sheet">
+  el.innerHTML=`<div class="sheet rules">
     <h1>Heat <span>· Pedal to the Metal</span></h1>
     <div class="tag">A fan build of the 1960s Grand Prix card game. Pick your challenge.</div>
-    <div class="tracklist" style="margin-top:6px">
+    <div class="racerules" style="margin-top:6px">
       <button class="trackcard" id="mode-single">
         <div class="tc-art" style="display:flex;align-items:center;justify-content:center;font-size:40px">🏁</div>
         <div class="tc-body"><div class="tc-name">Single Race</div>
