@@ -13,7 +13,7 @@ const TRACK_NEWYORK = defineTrack({
   eyebrow:"Custom Grand Prix · My Circuit 2",
   subtitle:"Custom build",
   tagline:"Hand-built fan board",
-  terrain:"oval",
+  terrain:"nyc",
 
   /* layout — "loop" is a normal circuit: the last space joins back to space 0 and
      the chequer sits on the join. "open" is point-to-point: space 0 is the START
