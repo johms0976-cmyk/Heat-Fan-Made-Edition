@@ -19,7 +19,7 @@ const TRACK_MONTJUIC = defineTrack({
   eyebrow:"Spainish International Grand Prix",
   subtitle:"Barcelona",
   tagline:"Spanish International Grand Prix",
-  terrain:"oval",
+  terrain:"urban",
   plate:{ x:875, y:100, w:300, h:115, rot:-2, title:"SPANISH GRAND PRIX", sub:"MONTJUïC",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:698,y:82}, podium:{x:105,y:556},
