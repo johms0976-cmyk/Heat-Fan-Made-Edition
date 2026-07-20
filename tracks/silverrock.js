@@ -14,7 +14,7 @@ const TRACK_SILVERROCK = defineTrack({
   eyebrow:"British Grand Prix · Silverstone",
   subtitle:"Custom build",
   tagline:"Racing In-It",
-  terrain:"oval",
+  terrain:"mountain",
   plate:{ x:32, y:616, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"MY CIRCUIT",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:801,y:255}, podium:{x:348,y:249},
