@@ -45,7 +45,7 @@ const TRACK_NEWYORK = defineTrack({
      into a chicane: same speed limit, blue kerbs, and ONE Road Condition token for
      the whole thing — a corner token modifies every line in it, a sector token
      modifies the sector AFTER it. Each line is still checked separately. */
-  corners:[ {at:13, limit:4, chicane:1, bx:18, by:676}, {at:15, limit:4, chicane:1, bx:178, by:728}, {at:33, limit:3, bx:1029, by:689}, {at:40, limit:2, bx:1180, by:319}, {at:60, limit:5, bx:394, by:40}, {at:68, limit:2, bx:483, by:373} ],
+  corners:[ {at:13, limit:4, chicane:1, bx:17, by:676}, {at:15, limit:4, chicane:1, bx:178, by:728}, {at:33, limit:3, bx:1029, by:689}, {at:40, limit:2, bx:1180, by:319}, {at:60, limit:5, bx:394, by:40}, {at:68, limit:2, bx:483, by:373} ],
 
   /* Gravel — space indices whose inner (Race Line) Spot and/or outer Spot is gravel.
      A space in both lists has gravel right across it. Rule: at the end of your turn
