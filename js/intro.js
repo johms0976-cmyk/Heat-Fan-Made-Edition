@@ -66,7 +66,7 @@
     // 1. backdrop
     const art = new Image();
     art.onload  = () => { if(loaderEl) loaderEl.classList.add("art"); };
-    art.src = "assets/loading.png";
+    art.src = "screens/background.png";
 
     // 2. wordmark — warm the cache; the <img> onerror handles the miss
     const word = new Image();
