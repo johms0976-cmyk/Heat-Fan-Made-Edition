@@ -14,7 +14,7 @@ const TRACK_FRANCE = defineTrack({
   eyebrow:"French Grand Prix",
   subtitle:"Base Game",
   tagline:"",
-  terrain:"oval",
+  terrain:"vineyard",
   plate:{ x:73, y:7, w:300, h:112, rot:-2, title:"Oui", sub:"Oui Oui!",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:1094,y:158}, podium:{x:99,y:569},
