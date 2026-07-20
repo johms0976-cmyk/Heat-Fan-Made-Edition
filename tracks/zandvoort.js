@@ -17,7 +17,7 @@ const TRACK_ZANDVOORT = defineTrack({
   eyebrow:"Grand Prix · Zandvoort",
   subtitle:"Custom build",
   tagline:"Hand-built fan board",
-  terrain:"oval",
+  terrain:"coast",
   plate:{ x:824, y:990, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"MY CIRCUIT",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:983,y:56}, podium:{x:1116,y:222},
