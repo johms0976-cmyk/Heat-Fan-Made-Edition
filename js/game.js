@@ -3326,6 +3326,33 @@ function playerCornerCheck(){
 /* shared spin-out: dump Engine Heat, drop back before the corner, take Stress,
    reset to 1st gear. `induced` marks weather-caused spin-outs for the storm red flag. */
 function weatherSpinOut(p, cornerTotal, tag, induced){
+  /* ---- rival spin-loop breaker -----------------------------------------
+     A bot with a dry Engine facing a tight corner (limit 1–2) could spin on
+     the same Corner Line forever: each spin dumps its Heat and stuffs its
+     hand with Stress, so the next attempt spins too. Real drivers don't do
+     that — the SECOND consecutive spin at the same Corner Line is therefore
+     downgraded to a "gather": the bot sheds whatever Heat it has, limps to
+     the first free Space past the line, takes just 1 Stress and drops to 1st
+     gear, and the race moves on. Humans are never touched by this. */
+  if(p.isBot){
+    if(p._spinLoop && p._spinLoop.ct === cornerTotal) p._spinLoop.n++;
+    else p._spinLoop = { ct: cornerTotal, n: 1 };
+    if(p._spinLoop.n >= 2){
+      const shed = p.engine;
+      p.discard.push(...Array(shed).fill().map(()=>makeCard("heat")));
+      p.engine = 0;
+      let t = cornerTotal; while(spaceFull(phys(t), p)) t++;
+      p.total = t; takeSpot(p); renderCars();
+      p.hand.push(makeCard("stress"));
+      p.gear = 1; p.spunOut = true;
+      if(p.pressPending) p.pressPending.clear();
+      p._spinLoop = null;
+      auditHeat(p, "spin gathered");
+      log(`${p.name} nearly loses it at the limit-${limitAt(cornerTotal)} corner AGAIN — gathers it up and limps through. 1 Stress, back to 1st gear.`, "warn");
+      registerWeatherSpin(!!induced);
+      return;
+    }
+  }
   const paid=p.engine;
   p.discard.push(...Array(paid).fill().map(()=>makeCard("heat")));
   p.engine=0;
@@ -3597,7 +3624,7 @@ function simChooseCards(p, prof){
       const heatCost = excess>0 ? excess + (cornerHasOverheat(nc)?1:0) : 0;
       const reserve = p.engine - prof.heatFloor;
       const leftover = p.engine - heatCost;             // engine after paying this corner
-      if(heatCost > p.engine)              score = -100 - heatCost;                       // would spin: avoid
+      if(heatCost > p.engine)              score = -100 - heatCost - stressN*8;               // would spin: avoid — and if unavoidable, prefer the smallest deterministic overshoot (a Stress flip could land a 4)
       else if(heatCost > Math.max(0,reserve)) score = sum - heatCost*3 - (prof.riskTolerance<1?18:4);
       else                                 score = sum - heatCost*(2-prof.aggression);
       score -= Math.max(0, prof.heatFloor - leftover)*3;// keep Heat banked for the corner after this one
@@ -3746,8 +3773,16 @@ function simDiscard(p, prof){
      !c.def.refresh && !c.def.direct && !c.def.draft && !c.def.supercool && !c.def.accel && !c.def.xslip);
   for(const c of opts) if(deadZero(c)) toGo.push(c);
   if(prof.aggression>0.6){
-    const ones=opts.filter(c=>c.t==="speed"&&c.v===1&&!toGo.includes(c));
-    if(ones.length>1) toGo.push(ones[0]);
+    // Never bin low cards while the Engine can't buy the car out of a tight
+    // corner ahead — a 1 in hand can be the only clean way through a limit-1/2
+    // apex, and shedding it is exactly how Pro/Legend rivals used to strand
+    // themselves spinning on the same Corner Line forever.
+    const nc = nextCornerTotal(p.total);
+    const tightAhead = nc!==Infinity && (limitAt(nc)+(p.limitAdj||0)) <= 2 && p.engine < 2;
+    if(!tightAhead){
+      const ones=opts.filter(c=>c.t==="speed"&&c.v===1&&!toGo.includes(c));
+      if(ones.length>1) toGo.push(ones[0]);
+    }
   }
   if(!toGo.length) return;
   p.hand=p.hand.filter(c=>!toGo.includes(c));
