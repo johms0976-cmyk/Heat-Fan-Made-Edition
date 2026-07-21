@@ -7,7 +7,7 @@ const TRACK_BOSS2 = defineTrack({
   key:"boss2",
   brief:"Insert track description for track selector screen",
   name:"Boss Mexico", spaces:87, defaultLaps:2, heat:6, stress:3,
-  image:"", imgW:1200, imgH:800,
+  image:"tracks/bossmexico.png", imgW:1200, imgH:800,
   eyebrow:"Boss Grand Prix · Mexico",
   subtitle:"Custom build",
   tagline:"Hand-built fan board",
