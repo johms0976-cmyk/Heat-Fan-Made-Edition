@@ -8,10 +8,10 @@ const TRACK_DRAG2 = defineTrack({
   brief:"Insert track description for track selector screen",
   name:"Drag2", spaces:35, defaultLaps:1, heat:6, stress:3,
   image:"", imgW:1200, imgH:800,
-  eyebrow:"Custom Grand Prix · My Circuit 2",
+  eyebrow:"Custom Grand Prix · Drag 2",
   subtitle:"Custom build",
   tagline:"Hand-built fan board",
-  terrain:"oval",
+  terrain:"desert",
 
   /* layout — "loop" is a normal circuit: the last space joins back to space 0 and
      the chequer sits on the join. "open" is point-to-point: space 0 is the START
@@ -30,7 +30,7 @@ const TRACK_DRAG2 = defineTrack({
      Total racing distance = (lapStart - startLine) + (defaultLaps - 1) * lapLen
                            + ((finishLine - lapStart) mod lapLen) + 1,  lapLen = spaces - lapStart. */
   layout:"open",
-  plate:{ x:697, y:423, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"MY CIRCUIT 2",
+  plate:{ x:697, y:423, w:300, h:112, rot:-2, title:"SPRINT", sub:"DESERT DRAG",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:292,y:122}, podium:{x:552,y:117},
   weatherTok:{x:296,y:119,r:38},
