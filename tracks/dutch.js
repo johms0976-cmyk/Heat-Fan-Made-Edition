@@ -15,7 +15,7 @@ const TRACK_DUTCH = defineTrack({
   subtitle:"Tunnel Vision Expansion",
   tagline:"",
   terrain:"holland",
-  plate:{ x:468, y:16, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"Red Light",
+  plate:{ x:468, y:16, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"DUTCH",
           titleColor:"#ff6a00", subColor:"#3a87fe" },
   panel:{x:534,y:457}, podium:{x:1089,y:554},
   weatherTok:{x:531,y:457,r:38},
