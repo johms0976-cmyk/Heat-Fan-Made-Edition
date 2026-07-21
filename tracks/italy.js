@@ -15,7 +15,7 @@ const TRACK_ITALY = defineTrack({
   subtitle:"Base Game",
   tagline:"When in Rome",
   terrain:"ruins",
-  plate:{ x:-35, y:16, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"When in Roma",
+  plate:{ x:-35, y:16, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"ITALIAN",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:109,y:261}, podium:{x:1070,y:108},
   weatherTok:{x:133,y:252,r:38},
