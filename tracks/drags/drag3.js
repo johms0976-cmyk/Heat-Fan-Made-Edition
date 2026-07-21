@@ -4,9 +4,9 @@
    Nothing else to change: defineTrack registers it in TRACKS and the picker
    lists every registered circuit automatically. */
 const TRACK_DRAG1 = defineTrack({
-  key:"drag1",
+  key:"drag3",
   brief:"Insert track description for track selector screen",
-  name:"Drag1", spaces:35, defaultLaps:1, heat:6, stress:3,
+  name:"Drag3", spaces:35, defaultLaps:1, heat:6, stress:3,
   image:"", imgW:1200, imgH:800,
   eyebrow:"Custom Grand Prix · My Circuit 2",
   subtitle:"Custom build",
