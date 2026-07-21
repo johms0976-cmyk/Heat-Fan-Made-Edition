@@ -3,7 +3,7 @@
    the defineTrack() helper — the end of the track list is the natural spot.
    Nothing else to change: defineTrack registers it in TRACKS and the picker
    lists every registered circuit automatically. */
-const TRACK_DRAG1 = defineTrack({
+const TRACK_DRAG3 = defineTrack({
   key:"drag3",
   brief:"Insert track description for track selector screen",
   name:"Drag3", spaces:35, defaultLaps:1, heat:6, stress:3,
