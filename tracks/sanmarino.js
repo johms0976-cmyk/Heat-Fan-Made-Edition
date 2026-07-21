@@ -7,7 +7,7 @@ const TRACK_SANMARINO = defineTrack({
   key:"sanmarino",
   brief:"Insert track description for track selector screen",
   name:"San Marino", spaces:71, defaultLaps:2, heat:6, stress:3,
-  image:"", imgW:1200, imgH:800,
+  image:"tracks/sanmarino.png", imgW:1200, imgH:800,
   eyebrow:"Grand Prix · San Marino",
   subtitle:"Custom build",
   tagline:"Hand-built fan board",
