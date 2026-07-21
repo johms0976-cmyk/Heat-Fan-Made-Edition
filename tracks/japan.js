@@ -15,7 +15,7 @@ const TRACK_JAPAN = defineTrack({
   subtitle:"Heavy Rain Expansion",
   tagline:"",
   terrain:"japan",
-  plate:{ x:-7, y:7, w:300, h:112, rot:-2, title:"Japanese Grand Prix", sub:"Flight of Blossoms",
+  plate:{ x:-7, y:7, w:300, h:112, rot:-2, title:"Japanese Grand Prix", sub:"Japanese",
           titleColor:"#64c466", subColor:"#eb4d3d" },
   panel:{x:106,y:179}, podium:{x:552,y:68},
   weatherTok:{x:106,y:176,r:38},
