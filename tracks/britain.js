@@ -18,7 +18,7 @@ const TRACK_BRITAIN = defineTrack({
   subtitle:"Base Game",
   tagline:"",
   terrain:"parkland",
-  plate:{ x:19, y:625, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"The Palace",
+  plate:{ x:19, y:625, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"BRITISH",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:123,y:481}, podium:{x:96,y:96},
   weatherTok:{x:112,y:478,r:38},
