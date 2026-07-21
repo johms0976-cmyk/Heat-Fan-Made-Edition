@@ -18,7 +18,7 @@ const TRACK_MONACO = defineTrack({
   subtitle:"Fan made Map",
   tagline:"Hand-built fan board",
   terrain:"riveira",
-  plate:{ x:390, y:19, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"MY CIRCUIT",
+  plate:{ x:390, y:19, w:300, h:112, rot:-2, title:"GRAND PRIX", sub:"Monaco",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:1079,y:728}, podium:{x:405,y:517},
   weatherTok:{x:1115,y:731,r:38},
