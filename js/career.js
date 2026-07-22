@@ -907,9 +907,10 @@ function showCareerIntro(){
   const races=acts.reduce((t,m)=>t+m.nodes.filter(n=>["enemy","drag","elite","boss"].includes(n.type)).length,0);
   const stops=acts.reduce((t,m)=>t+m.nodes.length,0);
   const bossRow=acts.map((m,i)=>{ const k=careerBossTrackFor(i+1); return k?trackName(k):"?"; }).join(" → ");
-  el.innerHTML=`<div class="sheet">
+  el.innerHTML=`<div class="sheet rules">
     <h1>HEAT <span>· ${esc(C.mapName.toLowerCase())}</span></h1>
     <div class="tag">Season opener. One tank, one car, one road to the Grand Final.</div>
+    <div class="racerules" style="margin-top:6px">
     <div class="optgroup"><div class="olbl">Your rig</div>
       <div class="deckcard" style="padding:12px">
         <div class="dk-art" style="height:130px">${DECK_ART[c.key]==="ok"?`<img src="${c.art}" alt="${esc(c.name)}">`:classCarSVG(c.key)}</div>
@@ -936,7 +937,7 @@ function showCareerIntro(){
 }
 function showCareerImport(){
   const el=$("#setup"); el.onclick=null; el.style.display="flex"; el.scrollTop=0;
-  el.innerHTML=`<div class="sheet">
+  el.innerHTML=`<div class="sheet rules">
     <h1>HEAT <span>· import a map</span></h1>
     <div class="tag">Paste a Mapforge export — the JSON download, the export box contents, or the paste-in <code>const</code> block all work. A bundle of three maps (<code>act1</code>, <code>act2</code>, <code>act3</code>) becomes the three acts; a single map is cut into three for you.</div>
     <textarea id="cimpBox" rows="10" spellcheck="false" style="width:100%;background:#12101a;color:#cfe3b8;border:1px solid #333;border-radius:8px;padding:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px"></textarea>
