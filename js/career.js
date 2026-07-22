@@ -910,12 +910,12 @@ function showCareerIntro(){
   el.innerHTML=`<div class="sheet rules">
     <h1>HEAT <span>· ${esc(C.mapName.toLowerCase())}</span></h1>
     <div class="tag">Season opener. One tank, one car, one road to the Grand Final.</div>
-    <div class="racerules" style="margin-top:6px">
     <div class="optgroup"><div class="olbl">Your rig</div>
       <div class="deckcard" style="padding:12px">
         <div class="dk-art" style="height:130px">${DECK_ART[c.key]==="ok"?`<img src="${c.art}" alt="${esc(c.name)}">`:classCarSVG(c.key)}</div>
         <div class="dk-name">${esc(c.name)}</div><div class="dk-tag">${esc(c.tag)}</div>
       </div></div>
+    <div class="racerules" style="margin-top:6px">
     <div class="optgroup"><div class="olbl">The deal</div>
       ${summaryRow("Sponsors", repPips(C.rep)+" — miss a stop's goal and one of them walks")}
       ${summaryRow("Starting purse","$"+C.money)}
@@ -984,7 +984,7 @@ function careerGenBook(){
 function careerGenMap(floorsWanted){
   const W={enemy:60,drag:14,night:16,trial:16,grudge:14,event:30,merchant:18,chop:18,rest:16,elite:16,treasure:4,city:14,town:10,poi:4};
   if(typeof TRACKS==="undefined" || !careerDragTracks().length){ delete W.drag; W.enemy=42; }
-  const floors=floorsWanted?Math.max(8,floorsWanted|0):(11+Math.floor(Math.random()*4)),
+  const floors=floorsWanted?Math.max(4,floorsWanted|0):(11+Math.floor(Math.random()*4)),
         lanes=5+Math.floor(Math.random()*2), paths=5+Math.floor(Math.random()*2);
   const MARGIN=70, w=600, h=floorsWanted?900:1200, tfloor=Math.floor(floors/2), elmin=Math.min(3,floors-2);
   const fp=f=>h-MARGIN-f*(h-2*MARGIN)/(floors-1), lp=l=>MARGIN+l*(w-2*MARGIN)/(lanes-1);
