@@ -1720,9 +1720,10 @@ function showDeckSelect(next, back){
   const where = (G.mode==="champ" && G.cup)
     ? `${G.cup.name} \u00b7 ${CUP_RACES} races` : TRACK.name;
 
-  el.innerHTML=`<div class="sheet">
+  el.innerHTML=`<div class="sheet rules">
     <h1>HEAT <span>\u00b7 choose your deck</span></h1>
     <div class="tag">${esc(where)} \u2014 swipe or tap the arrows to rotate the garage.</div>
+    <div class="racerules" style="margin-top:6px">
     <div class="deckwrap">
       <button class="deckarrow" id="deckprev" aria-label="Previous deck">\u2039</button>
       <div class="deckstage" id="deckstage"></div>
