@@ -986,11 +986,11 @@ function careerGenMap(floorsWanted){
   if(typeof TRACKS==="undefined" || !careerDragTracks().length){ delete W.drag; W.enemy=42; }
   const floors=floorsWanted?Math.max(4,floorsWanted|0):(11+Math.floor(Math.random()*4)),
         lanes=5+Math.floor(Math.random()*2), paths=5+Math.floor(Math.random()*2);
-  const MARGIN=70, w=600, h=floorsWanted?1800:2400, tfloor=Math.floor(floors/2), elmin=Math.min(3,floors-2);
+  const MARGIN=70, w=600, h=floorsWanted?900:1200, tfloor=Math.floor(floors/2), elmin=Math.min(3,floors-2);
   const fp=f=>h-MARGIN-f*(h-2*MARGIN)/(floors-1), lp=l=>MARGIN+l*(w-2*MARGIN)/(lanes-1);
   for(let attempt=0;attempt<40;attempt++){
     const nodes=[], edges=[], grid={}; let nextId=1;
-    const mk=(f,l)=>{ const k=f+","+l; if(grid[k]) return grid[k];
+    const mk=(f,l)=>{ const k=f+","+l; if(grid[k]) return grid[k];o
       const n={id:"n"+(nextId++),type:"enemy",label:"",floor:f,x:Math.round(lp(l)+Math.random()*18-9),y:Math.round(fp(f)),data:null};
       grid[k]=n; nodes.push(n); return n; };
     const topWalk=floors-2, edgeKeys=new Set(), laneEdges={};
