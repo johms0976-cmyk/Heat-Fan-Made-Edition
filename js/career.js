@@ -985,7 +985,7 @@ function careerGenMap(floorsWanted){
   if(typeof TRACKS==="undefined" || !careerDragTracks().length){ delete W.drag; W.enemy=42; }
   const floors=floorsWanted?Math.max(4,floorsWanted|0):(11+Math.floor(Math.random()*4)),
         lanes=5+Math.floor(Math.random()*2), paths=5+Math.floor(Math.random()*2);
-  const MARGIN=70, w=600, h=floorsWanted?900:1200, tfloor=Math.floor(floors/2), elmin=Math.min(3,floors-2);
+  const MARGIN=70, w=600, h=floorsWanted?900:1400, tfloor=Math.floor(floors/2), elmin=Math.min(3,floors-2);
   const fp=f=>h-MARGIN-f*(h-2*MARGIN)/(floors-1), lp=l=>MARGIN+l*(w-2*MARGIN)/(lanes-1);
   for(let attempt=0;attempt<40;attempt++){
     const nodes=[], edges=[], grid={}; let nextId=1;
