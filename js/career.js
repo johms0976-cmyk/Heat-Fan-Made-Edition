@@ -1752,8 +1752,9 @@ function showCareerShop(node){
   const full=false;                       // no garage cap any more
   const msold=(C.modSold=C.modSold||{})[node.id]=C.modSold[node.id]||[];
   const modStock=careerShopMods(node).filter(ms=>!msold.includes(ms.id)&&!(C.mods||[]).includes(ms.id));
-  el.innerHTML=`<div class="sheet">
+  el.innerHTML=`<div class="sheet rules">
     <h1>HEAT <span>· speed shop</span></h1>
+    <div class="racerules" style="margin-top:6px">
     <div class="cstatbar"><span class="cstat">${repPips(C.rep)}</span><span class="cstat">💰 <b>$${C.money}</b></span><span class="cstat">🛠️ <b>${C.upgrades.length}</b></span>${(C.damage|0)?`<span class="cstat" style="color:#e0b070">\uD83D\uDD29 <b>${C.damage}</b></span>`:""}</div>
     <div class="olbl" style="margin:6px 0 2px">Smooth it over with the backers</div>
     ${(C.rep|0)>=CAREER_REP_MAX
