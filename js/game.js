@@ -1306,12 +1306,12 @@ function showCupBuilder(cup){
     }).join("");
     el.innerHTML=`<div class="sheet rules">
       <h1>HEAT <span>· ${cup.name.toLowerCase()}</span></h1>
-      <div class="racerules" style="margin-top:6px">
+     
       <div class="tag">${missing.length
         ? `${missing.map(trackName).join(" & ")} isn't built yet — pick a stand-in to complete the cup.`
         : "Tap four circuits. The order you tap them is the order you race them."}</div>
       <div class="cuprail">${rail}</div>
-      <div class="tracklist" style="margin-top:12px">${cards}</div>
+      <div class="racerules" style="margin-top:12px">${cards}</div>
       <div class="btnrow" style="margin-top:16px">
         <button class="act" id="cupgo" ${slots.every(Boolean)?"":"disabled style=\"opacity:.45\""}>Season ▸</button>
         <button class="act secondary" id="cupbld-back">◂ Back</button>
