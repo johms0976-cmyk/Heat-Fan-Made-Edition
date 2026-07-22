@@ -1304,8 +1304,9 @@ function showCupBuilder(cup){
         </div>
       </button>`;
     }).join("");
-    el.innerHTML=`<div class="sheet">
+    el.innerHTML=`<div class="sheet rules">
       <h1>HEAT <span>· ${cup.name.toLowerCase()}</span></h1>
+      <div class="racerules" style="margin-top:6px">
       <div class="tag">${missing.length
         ? `${missing.map(trackName).join(" & ")} isn't built yet — pick a stand-in to complete the cup.`
         : "Tap four circuits. The order you tap them is the order you race them."}</div>
