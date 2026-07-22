@@ -981,7 +981,7 @@ function careerGenBook(){
 }
 /* ---------------- random roadmap (port of Mapforge's generator) */
 function careerGenMap(floorsWanted){
-  const W={enemy:60,drag:14,night:16,trial:16,grudge:14,event:30,merchant:18,chop:18,rest:16,elite:16,treasure:4,city:14,town:10,poi:4};
+  const W={enemy:30,drag:7,night:8,trial:8,grudge:7,event:15,merchant:9,chop:9,rest:8,elite:8,treasure:2,city:7,town:5,poi:2};
   if(typeof TRACKS==="undefined" || !careerDragTracks().length){ delete W.drag; W.enemy=42; }
   const floors=floorsWanted?Math.max(4,floorsWanted|0):(11+Math.floor(Math.random()*4)),
         lanes=5+Math.floor(Math.random()*2), paths=5+Math.floor(Math.random()*2);
