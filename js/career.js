@@ -540,7 +540,7 @@ function showCareerStandings(){
 }
 
 /* ============================================================
-   THE NEMESIS  \uD83D\uDE24
+   THE RIVAL  \uD83D\uDE24
    A grudge node doesn't roll a fresh driver — it fields the one driver in
    this act who has a problem with you, and keeps fielding them until one of
    you settles it. Beat them and they're off your card for good (and you
@@ -982,11 +982,11 @@ function careerGenBook(){
 }
 /* ---------------- random roadmap (port of Mapforge's generator) */
 function careerGenMap(floorsWanted){
-  const W={enemy:30,drag:7,night:8,trial:8,grudge:7,event:15,merchant:9,chop:9,rest:8,elite:8,treasure:2,city:7,town:5,poi:2};
+  const W={enemy:60,drag:14,night:16,trial:16,grudge:14,event:30,merchant:18,chop:18,rest:16,elite:16,treasure:4,city:14,town:10,poi:4};
   if(typeof TRACKS==="undefined" || !careerDragTracks().length){ delete W.drag; W.enemy=42; }
   const floors=floorsWanted?Math.max(4,floorsWanted|0):(11+Math.floor(Math.random()*4)),
         lanes=5+Math.floor(Math.random()*2), paths=5+Math.floor(Math.random()*2);
-  const MARGIN=70, w=600, h=floorsWanted?900:1400, tfloor=Math.floor(floors/2), elmin=Math.min(3,floors-2);
+  const MARGIN=70, w=600, h=floorsWanted?1800:2400, tfloor=Math.floor(floors/2), elmin=Math.min(3,floors-2);
   const fp=f=>h-MARGIN-f*(h-2*MARGIN)/(floors-1), lp=l=>MARGIN+l*(w-2*MARGIN)/(lanes-1);
   for(let attempt=0;attempt<40;attempt++){
     const nodes=[], edges=[], grid={}; let nextId=1;
@@ -1361,8 +1361,9 @@ function showCareerMap(){
       <text x="${n.x}" y="${n.y+r*0.42}" text-anchor="middle" font-size="${Math.round(r*1.25)}">${done&&!cur?"✔":face.icon}</text>
       ${cost}</g>`;
   }).join("");
-  el.innerHTML=`<div class="sheet" style="max-width:640px">
+  el.innerHTML=`<div class="sheet rules" style="max-width:640px">
     <h1>HEAT <span>· ${esc(C.mapName.toLowerCase())}</span></h1>
+    ‹div class="racerules">
     <div class="cstatbar">
       <span class="cstat" title="Sponsor confidence — miss a goal and you lose one">${repPips(C.rep)}</span>
       ${(C.damage|0)?`<span class="cstat" style="color:#e0b070" title="Spin-out damage: +${C.damage} Stress, −${C.damage} Heat capacity">\uD83D\uDD29 <b>${C.damage}</b> damage</span>`:""}
