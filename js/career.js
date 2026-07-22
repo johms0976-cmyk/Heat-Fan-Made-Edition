@@ -907,7 +907,7 @@ function showCareerIntro(){
   const races=acts.reduce((t,m)=>t+m.nodes.filter(n=>["enemy","drag","elite","boss"].includes(n.type)).length,0);
   const stops=acts.reduce((t,m)=>t+m.nodes.length,0);
   const bossRow=acts.map((m,i)=>{ const k=careerBossTrackFor(i+1); return k?trackName(k):"?"; }).join(" → ");
-  el.innerHTML=`<div class="sheet rules">
+  el.innerHTML=`<div class="sheet">
     <h1>HEAT <span>· ${esc(C.mapName.toLowerCase())}</span></h1>
     <div class="tag">Season opener. One tank, one car, one road to the Grand Final.</div>
     <div class="optgroup"><div class="olbl">Your rig</div>
@@ -915,7 +915,6 @@ function showCareerIntro(){
         <div class="dk-art" style="height:130px">${DECK_ART[c.key]==="ok"?`<img src="${c.art}" alt="${esc(c.name)}">`:classCarSVG(c.key)}</div>
         <div class="dk-name">${esc(c.name)}</div><div class="dk-tag">${esc(c.tag)}</div>
       </div></div>
-    <div class="racerules" style="margin-top:6px">
     <div class="optgroup"><div class="olbl">The deal</div>
       ${summaryRow("Sponsors", repPips(C.rep)+" — miss a stop's goal and one of them walks")}
       ${summaryRow("Starting purse","$"+C.money)}
