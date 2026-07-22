@@ -984,9 +984,9 @@ function careerGenBook(){
 function careerGenMap(floorsWanted){
   const W={enemy:60,drag:14,night:16,trial:16,grudge:14,event:30,merchant:18,chop:18,rest:16,elite:16,treasure:4,city:14,town:10,poi:4};
   if(typeof TRACKS==="undefined" || !careerDragTracks().length){ delete W.drag; W.enemy=42; }
-  const floors=floorsWanted?Math.max(4,floorsWanted|0):(11+Math.floor(Math.random()*4)),
+  const floors=floorsWanted?Math.max(8,floorsWanted|0):(11+Math.floor(Math.random()*4)),
         lanes=5+Math.floor(Math.random()*2), paths=5+Math.floor(Math.random()*2);
-  const MARGIN=70, w=400, h=floorsWanted?900:1200, tfloor=Math.floor(floors/2), elmin=Math.min(3,floors-2);
+  const MARGIN=70, w=600, h=floorsWanted?900:1200, tfloor=Math.floor(floors/2), elmin=Math.min(3,floors-2);
   const fp=f=>h-MARGIN-f*(h-2*MARGIN)/(floors-1), lp=l=>MARGIN+l*(w-2*MARGIN)/(lanes-1);
   for(let attempt=0;attempt<40;attempt++){
     const nodes=[], edges=[], grid={}; let nextId=1;
