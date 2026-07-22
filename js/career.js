@@ -989,7 +989,7 @@ function careerGenMap(floorsWanted){
   const fp=f=>h-MARGIN-f*(h-2*MARGIN)/(floors-1), lp=l=>MARGIN+l*(w-2*MARGIN)/(lanes-1);
   for(let attempt=0;attempt<40;attempt++){
     const nodes=[], edges=[], grid={}; let nextId=1;
-    const mk=(f,l)=>{ const k=f+","+l; if(grid[k]) return grid[k];o
+    const mk=(f,l)=>{ const k=f+","+l; if(grid[k]) return grid[k];
       const n={id:"n"+(nextId++),type:"enemy",label:"",floor:f,x:Math.round(lp(l)+Math.random()*18-9),y:Math.round(fp(f)),data:null};
       grid[k]=n; nodes.push(n); return n; };
     const topWalk=floors-2, edgeKeys=new Set(), laneEdges={};
