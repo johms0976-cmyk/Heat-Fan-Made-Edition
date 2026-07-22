@@ -1694,9 +1694,10 @@ function showCareerChopShop(node){
   const C=G.career, el=$("#setup"); el.onclick=null; el.style.display="flex"; el.scrollTop=0;
   const sp=careerStressPrice();
   const cuts=C.stressCuts|0;
-  el.innerHTML=`<div class="sheet">
+  el.innerHTML=`<div class="sheet rules">
     <h1>HEAT <span>· chop shop</span></h1>
     <div class="cstatbar"><span class="cstat">${repPips(C.rep)}</span><span class="cstat">💰 <b>$${C.money}</b></span><span class="cstat">🛠️ <b>${C.upgrades.length}</b> upgrades</span>${(C.damage|0)?`<span class="cstat" style="color:#e0b070">\uD83D\uDD29 <b>${C.damage}</b> damage</span>`:""}</div>
+   <div class="racerules" style="margin-top:6px">
     <div class="olbl" style="margin:10px 0 2px">Panel and chassis work</div>
     ${careerRepairHTML()}
     <div class="phase-hint" style="min-height:0;margin:12px 0 0">A fat deck is a slow deck. Every card in here is one you might draw instead of the 4 you wanted — pay the man and it's gone for good.</div>
