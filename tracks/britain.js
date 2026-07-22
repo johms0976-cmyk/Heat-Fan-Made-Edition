@@ -28,7 +28,7 @@ const TRACK_BRITAIN = defineTrack({
      into a chicane: same speed limit, blue kerbs, and ONE Road Condition token for
      the whole thing — a corner token modifies every line in it, a sector token
      modifies the sector AFTER it. Each line is still checked separately. */
-  corners:[ {at:15, limit:10, bx:1108, by:34}, {at:30, limit:6, bx:865, by:769}, {at:37, limit:5, bx:892, by:349}, {at:43, limit:4, bx:474, by:405}, {at:49, limit:3, bx:659, by:626} ],
+  corners:[ {at:15, limit:10, bx:1108, by:34}, {at:30, limit:6, bx:865, by:769}, {at:37, limit:5, bx:892, by:349}, {at:43, limit:4, bx:474, by:405}, {at:48, limit:3, bx:659, by:626} ],
 
   /* Gravel — space indices whose inner (Race Line) Spot and/or outer Spot is gravel.
      A space in both lists has gravel right across it. Rule: at the end of your turn
