@@ -1032,7 +1032,7 @@ function careerGenMap(){
         RESTRICT=5,                     // no elites/garages on idx 0–4 (floors 1–5)
         floors=CLIMB+1,                 // + the boss floor; the transition comes from sealActMap
         lanes=6, paths=6;
-  const MARGIN=70, w=400, h=1600;
+  const MARGIN=70, w=960, h=1600;
   const fp=f=>h-MARGIN-f*(h-2*MARGIN)/(floors-1), lp=l=>MARGIN+l*(w-2*MARGIN)/(lanes-1);
   for(let attempt=0;attempt<40;attempt++){
     const nodes=[], edges=[], grid={}; let nextId=1;
