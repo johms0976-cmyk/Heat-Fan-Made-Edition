@@ -107,7 +107,7 @@
      the click itself is the gesture that unlocks race playback. */
   const RACE_GO = "#sumGo, #csGo, #hsstart";
   document.addEventListener("click", (e) => {
-    if(e.target.closest && e.target.closest(RACE_GO)) HeatAudio.toRace();
+    if(e.target.closest && e.target.closest(RACE_GO)) HeatAudio.race();
   }, true);
 
   /* spin-out image modal: show the art, play the crash, wait for the player */
