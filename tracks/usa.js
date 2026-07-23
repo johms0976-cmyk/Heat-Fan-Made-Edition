@@ -15,7 +15,7 @@ const TRACK_USA = defineTrack({
   subtitle:"Base Game",
   tagline:"",
   terrain:"desert",
-  plate:{ x:-53, y:7, w:300, h:224, rot:-2, title:"ROOT 69", sub:"Cum First",
+  plate:{ x:-53, y:7, w:300, h:224, rot:-2, title:"GRAND PRIX", sub:"USA",
           titleColor:"#173a2a", subColor:"#0f5132" },
   panel:{x:118,y:258}, podium:{x:283,y:87},
   weatherTok:{x:136,y:252,r:38},
