@@ -29,7 +29,7 @@ const TRACK_JARAMA = defineTrack({
      into a chicane: same speed limit, blue kerbs, and ONE Road Condition token for
      the whole thing — a corner token modifies every line in it, a sector token
      modifies the sector AFTER it. Each line is still checked separately. */
-  corners:[ {at:14, limit:6, bx:92, by:657}, {at:26, limit:4, bx:417, by:528}, {at:30, limit:2}, {at:37, limit:7}, {at:46, limit:5, bx:820, by:61}, {at:51, limit:4, bx:1099, by:105}, {at:62, limit:2, bx:712, by:494}, {at:73, limit:5, bx:1147, by:216} ],
+  corners:[ {at:14, limit:6, bx:92, by:657}, {at:20, limit:5}, {at:26, limit:4, bx:417, by:528}, {at:30, limit:2}, {at:37, limit:7, bx:611, by:451}, {at:46, limit:5, bx:820, by:61}, {at:51, limit:4, bx:1099, by:105}, {at:62, limit:2, bx:712, by:494}, {at:73, limit:5, bx:1147, by:216} ],
 
   /* Gravel — space indices whose inner (Race Line) Spot and/or outer Spot is gravel.
      A space in both lists has gravel right across it. Rule: at the end of your turn
