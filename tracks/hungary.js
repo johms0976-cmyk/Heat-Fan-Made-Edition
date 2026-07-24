@@ -7,7 +7,7 @@ const TRACK_HUNGARY = defineTrack({
   key:"hungary",
   brief:"Insert track description for track selector screen",
   name:"Hungary", spaces:91, defaultLaps:2, heat:6, stress:3,
-  image:"", imgW:1200, imgH:800,
+  image:"tracks/Hungary.jpg", imgW:1200, imgH:800,
   eyebrow:"Grand Prix · Hungary",
   subtitle:"Custom build",
   tagline:"Hand-built fan board",
@@ -54,6 +54,15 @@ const TRACK_HUNGARY = defineTrack({
      Cooling down (card goes to the Engine) and Scrap (card comes off the top of the
      draw deck) are not discards, so both are still allowed inside a tunnel. */
   tunnels:[  ],
+
+    /* Trackside props — what the first-person cockpit cam (fpview.js) builds
+     beside the road. Inclusive space runs (wrapping past 0 on loops); side
+     \"out\" = away from the Race Line, \"in\" = the Race Line side; kind is
+     one of the TS_KINDS keys (beach, grandstand, pits, buildings, forest…).
+     Purely visual — no effect on the rules. Unclaimed spaces keep the
+     terrain's usual random scenery. */
+  trackside:[ {from:83, to:8, side:"in", kind:"grandstand"}, {from:83, to:8, side:"in", kind:"grandstand"}, {from:7, to:10, side:"out", kind:"pits"}, {from:11, to:32, side:"out", kind:"forest"}, {from:11, to:41, side:"in", kind:"forest"}, {from:33, to:41, side:"out", kind:"field"}, {from:42, to:54, side:"out", kind:"forest"} ],
+
 
   legendsLine:7,
   spacePts:[[33,404],[33,356],[33,308],[33,278],[33,232],[36,184],[36,136],[39,94],[75,46],[127,30],[190,52],[214,91],[223,148],[223,181],[220,226],[220,278],[246,332],[286,362],[353,338],[374,308],[404,278],[440,245],[461,217],[507,184],[546,169],[588,160],[630,151],[672,142],[712,130],[753,119],[799,103],[838,97],[877,88],[920,73],[959,67],[998,55],[1043,42],[1101,27],[1149,55],[1170,115],[1158,160],[1146,196],[1134,241],[1125,278],[1113,329],[1104,359],[1091,404],[1079,450],[1070,483],[1055,531],[1046,567],[1034,609],[1022,652],[1010,694],[968,733],[923,754],[874,760],[832,757],[793,757],[742,757],[703,754],[666,754],[615,757],[579,757],[537,754],[491,757],[452,754],[401,745],[362,697],[362,649],[362,612],[359,567],[356,528],[338,462],[277,437],[232,477],[223,522],[223,567],[220,615],[220,649],[214,709],[178,757],[130,769],[66,748],[36,703],[36,655],[36,612],[36,576],[33,525],[33,498],[33,440]]
