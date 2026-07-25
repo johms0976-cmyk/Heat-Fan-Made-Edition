@@ -2309,12 +2309,139 @@ function tsCrowd(g, cx, baseY, w, h, seed, u){
 }
 
 
-
 /* ---------- sprites ---------- */
 /* rel   = rival's heading relative to the camera (radians) — the nose and
            front wheels swing sideways with it, so cars visibly turn in
    brake = flare the brake lights on the wing endplates */
+/* =====================================================================
+   RIVAL CAR SPRITES  — swap the procedural (vector) rival for PNG art.
+   Assets:  assets/rivals/<colour>.png        (straight rear view)
+            assets/rivals/<colour>left.png     (shallow rear-3/4, LEFT)
+   The right-lean is the LEFT image mirrored in code (ctx.scale(-1,1)).
+   Anything not loaded (or a missing file) falls back to the vector car.
+   Tunables live on RIVAL_SPR and are exposed on window for live tweaking.
+   ===================================================================== */
+const RIVAL_SPR = {
+  on     : true,               // master switch — false = always vector
+  base   : "assets/rivals/",   // asset folder
+  foot   : 1.25,               // on-screen car width = foot × w (match vector)
+  turnTh : 0.18,               // |sin(rel)| below this = drive the straight sprite
+  byHex  : {},                 // optional exact override, e.g. {"#33aa55":"green"}
+  _cache : {}                  // colourName -> { straight:rec, left:rec }
+};
+try { window.RIVAL_SPR = RIVAL_SPR; } catch(e){}
+
+/* hex -> one of the 9 asset colour names (HSL so grey/white/black are safe) */
+function rivalColorName(hex){
+  const key = (hex||"").toLowerCase();
+  if(RIVAL_SPR.byHex[key]) return RIVAL_SPR.byHex[key];
+  const m = /^#?([0-9a-f]{6})$/i.exec(key);
+  if(!m) return "grey";
+  const n = parseInt(m[1],16), r=(n>>16)/255, g=((n>>8)&255)/255, b=(n&255)/255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), L=(mx+mn)/2, d=mx-mn;
+  const S = d===0 ? 0 : d/(1-Math.abs(2*L-1));
+  if(L>0.82) return "white";
+  if(L<0.16) return "black";
+  if(S<0.18) return "grey";
+  let hue;                                    // 0..360
+  if(mx===r)      hue = 60*(((g-b)/d)%6);
+  else if(mx===g) hue = 60*(((b-r)/d)+2);
+  else            hue = 60*(((r-g)/d)+4);
+  if(hue<0) hue+=360;
+  const HUES = { red:0, orange:30, yellow:55, green:130, blue:220, pink:330 };
+  let best="green", bd=1e9;
+  for(const k in HUES){
+    let dd = Math.abs(hue-HUES[k]); dd = Math.min(dd, 360-dd);
+    if(dd<bd){ bd=dd; best=k; }
+  }
+  return best;
+}
+
+/* measure tight alpha bbox once → anchor = (bbox-centre-x, bbox-bottom-y) */
+function measureSprite(img){
+  const iw=img.naturalWidth, ih=img.naturalHeight;
+  try{
+    const c=document.createElement("canvas"); c.width=iw; c.height=ih;
+    const cx=c.getContext("2d"); cx.drawImage(img,0,0);
+    const d=cx.getImageData(0,0,iw,ih).data;
+    let minx=iw,maxx=0,miny=ih,maxy=0,found=false;
+    for(let y=0;y<ih;y++) for(let x=0;x<iw;x++){
+      if(d[(y*iw+x)*4+3]>16){ found=true;
+        if(x<minx)minx=x; if(x>maxx)maxx=x; if(y<miny)miny=y; if(y>maxy)maxy=y; }
+    }
+    if(found) return { ax:(minx+maxx)/2, ay:maxy, bw:(maxx-minx+1), bh:(maxy-miny+1) };
+  }catch(e){}                                 // tainted (cross-origin) → fallback
+  return { ax:iw*0.5, ay:ih*0.702, bw:iw*0.91, bh:ih*0.46 };
+}
+
+function loadSprite(url){
+  const rec = { img:new Image(), ready:false, meta:null, bad:false };
+  rec.img.crossOrigin = "anonymous";
+  rec.img.onload  = ()=>{ rec.meta = measureSprite(rec.img); rec.ready = true; };
+  rec.img.onerror = ()=>{ rec.bad = true; };
+  rec.img.src = url;
+  return rec;
+}
+function loadRivalSet(name){
+  let set = RIVAL_SPR._cache[name];
+  if(set) return set;
+  set = RIVAL_SPR._cache[name] = {
+    straight: loadSprite(RIVAL_SPR.base + name + ".png"),
+    left    : loadSprite(RIVAL_SPR.base + name + "left.png")
+  };
+  return set;
+}
+
+/* choose straight / left / mirrored-right from the steer, with graceful
+   degradation: turn image missing → straight; nothing ready → null (vector) */
+function pickRivalSprite(color, rel){
+  if(!RIVAL_SPR.on) return null;
+  const set = loadRivalSet(rivalColorName(color));
+  const s = Math.sin(rel||0);
+  let rec, mirror=false;
+  if(Math.abs(s) < RIVAL_SPR.turnTh) rec = set.straight;
+  else if(s < 0) { rec = set.left; mirror = false; }   // nose swings left
+  else           { rec = set.left; mirror = true;  }   // mirror → nose right
+  if((!rec || !rec.ready) && set.straight && set.straight.ready){ rec=set.straight; mirror=false; }
+  if(!rec || !rec.ready || !rec.meta) return null;
+  return { img:rec.img, meta:rec.meta, mirror };
+}
+
+/* blit anchored so (meta.ax,meta.ay) lands on the road point (x,y).
+   Under the mirror the anchor stays at the local origin, so the car flips
+   about its own centre — same screen position, just leaning the other way. */
+function blitSprite(g, img, x, y, s, ax, ay, mirror){
+  g.save();
+  g.translate(x, y);
+  if(mirror) g.scale(-1, 1);
+  g.drawImage(img, -ax*s, -ay*s, img.naturalWidth*s, img.naturalHeight*s);
+  g.restore();
+}
+
+function drawRivalSprite(g, sp, x, y, w, glow, brake){
+  const s = (RIVAL_SPR.foot * w) / sp.meta.bw;   // width = foot×w on screen
+  /* contact shadow (kept from the vector car) */
+  g.save(); g.fillStyle = "rgba(0,0,0,.38)";
+  g.beginPath(); g.ellipse(x, y, w*0.60, w*0.11, 0, 0, 7); g.fill(); g.restore();
+  /* brake bloom behind the car */
+  if(brake){
+    const by = y - w*0.50;
+    const bl = g.createRadialGradient(x, by, w*0.03, x, by, w*0.62);
+    bl.addColorStop(0, "rgba(255,60,40,.30)"); bl.addColorStop(1, "rgba(255,60,40,0)");
+    g.save(); g.fillStyle = bl; g.fillRect(x-w*0.72, by-w*0.55, w*1.44, w*1.05); g.restore();
+  }
+  blitSprite(g, sp.img, x, y, s, sp.meta.ax, sp.meta.ay, sp.mirror);
+  /* engine heat glimmer over the tail */
+  if(glow > 0.02){
+    g.save(); g.fillStyle = `rgba(255,140,60,${Math.min(.7, glow)})`;
+    g.beginPath(); g.ellipse(x, y - w*0.30, w*0.11, w*0.055, 0, 0, 7); g.fill(); g.restore();
+  }
+}
+
 function drawRival(g, x, y, w, color, glow, rel, brake){
+  const sp = pickRivalSprite(color, rel);
+  if(sp){ drawRivalSprite(g, sp, x, y, w, glow, brake); return; }   // PNG path
+  /* ---- vector fallback (original procedural car) ---- */
   const h = w*0.72;
   const k  = Math.max(-1, Math.min(1, Math.sin(rel||0)*1.6));
   const fx = k*w*0.40;                       // how far the nose swings
@@ -2449,6 +2576,7 @@ function drawWheel(g, steer, p){
   }
   g.restore();
 }
+
 
 /* ---------- one rendered frame ---------- */
 function render(dt){
