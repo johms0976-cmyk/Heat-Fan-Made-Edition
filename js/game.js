@@ -687,7 +687,7 @@ const VEHICLE_CLASSES = [
     tag:"Base Game. The balanced baseline.",
     deck:[3,3,3,3], tank:0, stress:0, limitAdj:0, slipBase:2, spinStress:0,
     cool:{1:3, 2:1},
-    starters:[ {name:"Coast", v:0}, {name:"Full Send", v:5}, {xheat:true} ],
+    starters:[ {name:"up0", v:0}, {name:"up5", v:5}, {xheat:true} ],
     blurb:"Even deck (3× 1–4) · 6-Heat Engine · standard corner limits · Cooldown 3/1 in gears 1–2. Drives exactly like the classic game." },
   { key:"v8", icon:"🛻", name:"V8 Supercar", art:"assets/avatars/decks/warlord.png",
     tag:"Fan Made - Monstrous on straights",
