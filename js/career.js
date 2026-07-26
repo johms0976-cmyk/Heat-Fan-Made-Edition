@@ -15,7 +15,7 @@
    "monaco", "monaco|top3" or "monaco|win|2" pins track / goal / laps.
    ============================================================ */
 const CAREER_STORE = "heat_career_v1";
-const CAREER_START = { rep:1, money:60 };
+const CAREER_START = { rep:1, money:20 };
 
 /* ============================================================
    SPONSOR CONFIDENCE  ⭐
