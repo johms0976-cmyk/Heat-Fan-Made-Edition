@@ -15,7 +15,7 @@
    "monaco", "monaco|top3" or "monaco|win|2" pins track / goal / laps.
    ============================================================ */
 const CAREER_STORE = "heat_career_v1";
-const CAREER_START = { rep:2, money:60 };
+const CAREER_START = { rep:1, money:60 };
 
 /* ============================================================
    SPONSOR CONFIDENCE  ⭐
@@ -27,7 +27,7 @@ const CAREER_START = { rep:2, money:60 };
    Confidence is deliberately hard to buy back: sponsor days, the odd event,
    and winning the races that matter.
    ============================================================ */
-const CAREER_REP_MAX  = 5;
+const CAREER_REP_MAX  = 2;
 const CAREER_REP_ICON = "\u2B50";
 const CAREER_REP_NAME = "sponsor confidence";
 /* pips, so the meter reads as a threat rather than a number */
@@ -61,7 +61,7 @@ const CAREER_DMG_MAX  = 3;
 const REPAIR_BASE = 55;
 const REPAIR_STEP = 35;
 const CAREER_MAXUP = Infinity;                // garage slots — no cap any more
-const CAREER_POS_MONEY = [60,40,30,20,15,10,10,10];
+const CAREER_POS_MONEY = [30,20,15,10,8,5,5,5];
 const CAREER_ACT_COUNT = 3;
 
 /* ============================================================
@@ -114,13 +114,13 @@ const CAREER_ACTS = [
   null,
   { n:1, roman:"I",   name:"Backroads",     icon:"\uD83C\uDF3E",
     blurb:"Club meetings and cash-in-hand grudge races. The field can barely drive.",
-    diff:1, bots:[4,5], nUp:[0,1], rivalChance:0.20 },
+    diff:1, bots:[4,5], nUp:[0,2], rivalChance:0.20 },
   { n:2, roman:"II",  name:"The Circuit",   icon:"\uD83C\uDFC1",
     blurb:"Proper grids, proper drivers, proper money. Everyone here has a trick.",
-    diff:2, bots:[5,6], nUp:[2,3], rivalChance:0.40 },
+    diff:2, bots:[5,6], nUp:[4,5], rivalChance:0.40 },
   { n:3, roman:"III", name:"The Big Leagues", icon:"\uD83D\uDD25",
     blurb:"Legends only. They have full garages and no reason to be kind about it.",
-    diff:3, bots:[6,7], nUp:[4,6], rivalChance:0.65 },
+    diff:3, bots:[6,7], nUp:[6,8], rivalChance:0.65 },
 ];
 /* Which act you're in is now simply which map screen you're on — there is no
    floor-fraction arithmetic left. A node always belongs to the act whose map
@@ -727,12 +727,12 @@ function nodeRaceCfg(node, kindOverride){
      rep — the only places sponsor confidence is handed back for driving.
            Ordinary stops pay nothing: keeping the backers happy is about
            NOT missing goals, and the big races are how you claw one back. */
-  const bonus = kind==="boss"     ? {m:140,rep:2,upg:true}
-              : kind==="actboss"  ? {m:90, rep:1,upg:true}
-              : kind==="elite"    ? {m:60, rep:1,upg:true,mod:true}
-              : kind==="grudge"   ? {m:70, rep:1,upg:true,mod:true}
-              : kind==="night"    ? {m:80, rep:0,upg:true,mod:true}
-              : kind==="trial"    ? {m:55, rep:0,upg:true}
+  const bonus = kind==="boss"     ? {m:70,rep:2,upg:true}
+              : kind==="actboss"  ? {m:45, rep:1,upg:true}
+              : kind==="elite"    ? {m:30, rep:1,upg:true,mod:true}
+              : kind==="grudge"   ? {m:35, rep:1,upg:true,mod:true}
+              : kind==="night"    ? {m:40, rep:0,upg:true,mod:true}
+              : kind==="trial"    ? {m:25, rep:0,upg:true}
               :                     {m:30, rep:0,upg:true};
   /* Upgrade cards in the opposition's decks — the toughness dial that the
      player's own (uncapped) garage is meant to answer. */
