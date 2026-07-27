@@ -714,8 +714,8 @@ const HZN = {
   rise   : 0.17,     // plate height as a fraction of canvas height H
   drop   : 1,        // px the plate base sits below the horizon (tucks under ground)
   haze   : 0.55,     // aerial-perspective haze strength at the horizon
-  hideSil: false,    // true + plate loaded → skip the vector silhouette
-  proc   : false,    // draw a soft procedural far-ridge when there's no plate art
+  hideSil: true,    // true + plate loaded → skip the vector silhouette
+  proc   : true,    // draw a soft procedural far-ridge when there's no plate art
   _sets:{}, _def:null
 };
 try{ window.HZN = HZN; }catch(e){}
