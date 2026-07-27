@@ -14,7 +14,7 @@ const TRACK_ADELAIDE = defineTrack({
   key:"adelaide",
   brief:"Insert track description for track selector screen",
   name:"adelaide", spaces:102, defaultLaps:2, heat:6, stress:3,
-  image:"tracks/Adelaide.jpg", imgW:1200, imgH:800,
+  image:"tracks/adelaide.png", imgW:1200, imgH:800,
   eyebrow:"Custom Grand Prix · My Circuit",
   subtitle:"Custom build",
   tagline:"Hand-built fan board",
