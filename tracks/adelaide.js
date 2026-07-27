@@ -29,7 +29,7 @@ const TRACK_ADELAIDE = defineTrack({
      into a chicane: same speed limit, blue kerbs, and ONE Road Condition token for
      the whole thing — a corner token modifies every line in it, a sector token
      modifies the sector AFTER it. Each line is still checked separately. */
-  corners:[ {at:11, limit:3, bx:374, by:602}, {at:17, limit:3, bx:362, by:318}, {at:23, limit:3, bx:80, by:292}, {at:29, limit:3, bx:80, by:76}, {at:55, limit:2, bx:1138, by:68}, {at:72, limit:5, bx:532, by:180}, {at:84, limit:7, bx:952, by:312}, {at:92, limit:2, bx:1124, by:728} ],
+  corners:[ {at:11, limit:3, bx:374, by:602}, {at:17, limit:3, bx:362, by:318}, {at:23, limit:3, bx:80, by:292}, {at:29, limit:3, bx:80, by:76}, {at:55, limit:2, bx:1138, by:68}, {at:72, limit:5, bx:532, by:180}, {at:84, limit:7, bx:952, by:312}, {at:93, limit:2, bx:1124, by:728} ],
 
   /* Gravel — space indices whose inner (Race Line) Spot and/or outer Spot is gravel.
      A space in both lists has gravel right across it. Rule: at the end of your turn
