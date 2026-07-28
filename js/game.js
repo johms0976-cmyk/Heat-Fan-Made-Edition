@@ -1301,8 +1301,7 @@ function showCupSelect(){
   };
   el.innerHTML=`<div class="sheet rules">
     <h1>HEAT <span>· choose your cup</span></h1>
-    <div class="tag">Every cup is four races. Points after the finale crown the champion.</div>
-    <div class="racerules">
+    <div class="tag">Every cup is four races. Points after the finale crown the champion.</div>   
     
     <div class="tracklist">${CUPS.map(card).join("")}</div>
     <div class="btnrow" style="margin-top:14px"><button class="act secondary" id="cupback">◂ Back</button></div>
