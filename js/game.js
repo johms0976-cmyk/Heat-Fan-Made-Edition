@@ -1235,7 +1235,8 @@ function showModeSelect(){
   el.innerHTML=`<div class="sheet rules">
     <h1>Heat <span>· Pedal to the Metal</span></h1>
     <div class="tag">A fan build of the 1960s Grand Prix card game. Pick your challenge.</div>
-    <div class="racerules" style="margin-top:6px">
+    ‹div class="racerules">
+    <div class="tracklist" style="margin-top:6px">
       <button class="trackcard" id="mode-single">
         <div class="tc-art" style="display:flex;align-items:center;justify-content:center;font-size:40px">🏁</div>
         <div class="tc-body"><div class="tc-name">Single Race</div>
@@ -1483,7 +1484,7 @@ function showChampSummary(){
       <div style="margin-left:auto;color:var(--cream-dim);font-size:12px">${t?`${t.spaces} spaces · ${t.corners.length} corners`:""}</div>
     </div>`;
   }).join("");
-  el.innerHTML=`<div class="sheet">
+  el.innerHTML=`<div class="sheet rules">
     <h1>HEAT <span>· ${esc(cup.name.toLowerCase())}</span></h1>
     <div class="tag">Four races, one title. Points after the finale crown the champion.</div>
     <div class="optgroup"><div class="olbl">Season calendar</div>${rounds}</div>
