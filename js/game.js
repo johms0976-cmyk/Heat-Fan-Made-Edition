@@ -1242,13 +1242,6 @@ function showModeSelect(){
           <div class="tc-meta">One circuit, lights-out to flag. Optional Garage &amp; weather.</div></div>
         <div class="tc-go">Go ▸</div>
       </button>
-
-     <button class="trackcard" id="test">
-        <div class="tc-art" style="display:flex;align-items:center;justify-content:center;font-size:40px">🏁</div>
-        <div class="tc-body"><div class="tc-name">test</div>
-          <div class="tc-meta">One circuit, lights-out to flag. Optional Garage &amp; weather.</div></div>
-        <div class="tc-go">Go ▸</div>
-      </button>
       
       <button class="trackcard" id="mode-champ">
         <div class="tc-art" style="display:flex;align-items:center;justify-content:center;font-size:40px">🏆</div>
@@ -1311,7 +1304,7 @@ function showCupSelect(){
     <h1>HEAT <span>· choose your cup</span></h1>
     <div class="tag">Every cup is four races. Points after the finale crown the champion.</div>   
     
-    <div class="tracklist">${CUPS.map(card).join("")}</div>
+    <div class="racerules">${CUPS.map(card).join("")}</div>
     <div class="btnrow" style="margin-top:14px"><button class="act secondary" id="cupback">◂ Back</button></div>
   </div>`;
   $("#cupback").onclick=()=>{ el.style.display="none"; showModeSelect(); };
