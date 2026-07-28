@@ -1232,7 +1232,7 @@ function showRaceLoading(title, sub, done){
 const CHAMP_POINTS = [9,6,4,3,2,1,0,0];   // podium points by finishing position
 function showModeSelect(){
   const el=$("#setup"); el.onclick=null; el.style.display="flex"; el.scrollTop=0;
-  el.innerHTML=`<div class="sheet">
+  el.innerHTML=`<div class="sheet tspicker">
     <h1>Heat <span>· Pedal to the Metal</span></h1>
     <div class="tag">A fan build of the 1960s Grand Prix card game. Pick your challenge.</div>
     <div class="tracklist" style="margin-top:6px">
@@ -1299,10 +1299,9 @@ function showCupSelect(){
       <div class="tc-go">${cup.tracks && !missing.length ? "Season ▸" : "Build ▸"}</div>
     </button>`;
   };
-  el.innerHTML=`<div class="sheet rules">
+  el.innerHTML=`<div class="sheet tspicker">
     <h1>HEAT <span>· choose your cup</span></h1>
     <div class="tag">Every cup is four races. Points after the finale crown the champion.</div>
-    <div class="racerules">
     
     <div class="tracklist">${CUPS.map(card).join("")}</div>
     <div class="btnrow" style="margin-top:14px"><button class="act secondary" id="cupback">◂ Back</button></div>
@@ -1348,7 +1347,7 @@ function showCupBuilder(cup){
         </div>
       </button>`;
     }).join("");
-    el.innerHTML=`<div class="sheet">
+    el.innerHTML=`<div class="sheet tspicker">
       <h1>HEAT <span>· ${cup.name.toLowerCase()}</span></h1>
       <div class="tag">${missing.length
         ? `${missing.map(trackName).join(" & ")} isn't built yet — pick a stand-in to complete the cup.`
