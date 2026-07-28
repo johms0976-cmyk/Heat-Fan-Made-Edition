@@ -1242,6 +1242,14 @@ function showModeSelect(){
           <div class="tc-meta">One circuit, lights-out to flag. Optional Garage &amp; weather.</div></div>
         <div class="tc-go">Go ▸</div>
       </button>
+
+     <button class="trackcard" id="test">
+        <div class="tc-art" style="display:flex;align-items:center;justify-content:center;font-size:40px">🏁</div>
+        <div class="tc-body"><div class="tc-name">test</div>
+          <div class="tc-meta">One circuit, lights-out to flag. Optional Garage &amp; weather.</div></div>
+        <div class="tc-go">Go ▸</div>
+      </button>
+      
       <button class="trackcard" id="mode-champ">
         <div class="tc-art" style="display:flex;align-items:center;justify-content:center;font-size:40px">🏆</div>
         <div class="tc-body"><div class="tc-name">Championship</div>
