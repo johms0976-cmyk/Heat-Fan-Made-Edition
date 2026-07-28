@@ -1235,7 +1235,7 @@ function showModeSelect(){
   el.innerHTML=`<div class="sheet rules">
     <h1>Heat <span>· Pedal to the Metal</span></h1>
     <div class="tag">A fan build of the 1960s Grand Prix card game. Pick your challenge.</div>
-    ‹div class="racerules">
+    ‹div class="racerules"></div>
     <div class="tracklist" style="margin-top:6px">
       <button class="trackcard" id="mode-single">
         <div class="tc-art" style="display:flex;align-items:center;justify-content:center;font-size:40px">🏁</div>
