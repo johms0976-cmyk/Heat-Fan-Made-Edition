@@ -31,7 +31,8 @@
    Per-part options shared by every primitive:
        c     palette slot name, or {top,bot,left,right,front,back} for box
        z     sort bias: higher draws later (on top).  Default 0.
-       dbl   informational only — nothing is culled (see below)
+       d     detail flag: 1 = dropped from the far LOD.  Put it on anything
+             that stops reading below ~60px — mirrors, exhausts, suspension.
 
    Why no backface culling: with closed primitives the back faces are
    overdrawn by the front ones anyway, and skipping the cull removes a
@@ -175,32 +176,37 @@ function buildPoly(V, F, p){
 
 const BUILDERS = { box:buildBox, cyl:buildCyl, quad:buildPoly, tri:buildPoly, poly:buildPoly };
 
-function build(model){
+/* far = true builds the reduced mesh, skipping every part marked d:1.
+   Both variants are cached on the model, so this costs nothing per frame. */
+function build(model, far){
   if(typeof model === "string") model = POLY.models[model];
   if(!model) return null;
-  if(model._mesh) return model._mesh;
+  const key = far ? "_meshFar" : "_mesh";
+  if(model[key]) return model[key];
   const V = [], F = [];
   for(const part of (model.parts || [])){
+    if(far && part.d) continue;
     const fn = BUILDERS[part.k];
     if(fn) fn(V, F, part);
   }
-  model._mesh = {
+  model[key] = {
     verts   : Float32Array.from(V),
     faces   : F,
     width   : model.width || 1,
     anchors : model.anchors || null
   };
-  return model._mesh;
+  return model[key];
 }
 
 /* ----------------------------------------------------------------- draw */
 /* scratch buffers, grown on demand — no per-frame allocation */
-let SX = new Float32Array(0), SY = new Float32Array(0), CZ = new Float32Array(0);
-let NX = new Float32Array(0), NY = new Float32Array(0), NZ = new Float32Array(0);
+let SX = new Float32Array(0), SY = new Float32Array(0);          // screen px
+let AX = new Float32Array(0), AY = new Float32Array(0), AZ = new Float32Array(0);
 let ORD = [];
 function grow(n){
   if(SX.length >= n) return;
-  SX = new Float32Array(n); SY = new Float32Array(n); CZ = new Float32Array(n);
+  SX = new Float32Array(n); SY = new Float32Array(n);
+  AX = new Float32Array(n); AY = new Float32Array(n); AZ = new Float32Array(n);
 }
 
 /*  POLY.draw(g, model, o)
@@ -215,6 +221,7 @@ function grow(n){
       scale    screen px per model unit  (or pass `w` = desired screen width)
       pitch    radians; viewer looks down on the object by this much
       persp    0..0.3 mild vanishing, default 0.06
+      far      true = use the reduced LOD (drops parts marked d:1)
 
     mode "persp"   — true perspective from an eye at the origin looking +Y.
       cx, horizon, focal                     match fpview's projector
@@ -224,7 +231,7 @@ function grow(n){
 
     Returns { anchors:{name:{x,y,s}}, faces:n } or null.            */
 function draw(g, model, o){
-  const mesh = build(model);
+  const mesh = build(model, o.far);
   if(!mesh) return null;
   const V = mesh.verts, F = mesh.faces, n = V.length/3;
   grow(n);
@@ -257,15 +264,15 @@ function draw(g, model, o){
       const s = o.focal / d;
       SX[k] = o.cx + ax*s;
       SY[k] = o.horizon - az*s;
-      CZ[k] = ay;
     }else{
       /* camera pitch about X: viewer tipped down toward the object */
       const t = ay*cp - az*sp; az = ay*sp + az*cp; ay = t;
       const q = 1 / (1 + ay*pk);
       SX[k] = o.x + ax*scale*q;
       SY[k] = o.y - az*scale*q;
-      CZ[k] = ay;
     }
+    /* keep camera space too — normals must be built here, not from pixels */
+    AX[k] = ax; AY[k] = ay; AZ[k] = az;
   }
 
   /* --- depth-sort faces (mean camera-space depth, plus the z bias) --- */
@@ -274,7 +281,7 @@ function draw(g, model, o){
   for(let f=0; f<nf; f++){
     const idx = F[f].i;
     let d = 0;
-    for(let j=0;j<idx.length;j++) d += CZ[idx[j]];
+    for(let j=0;j<idx.length;j++) d += AY[idx[j]];
     ORD[f] = { f, d: d/idx.length - (F[f].z||0)*1e3 };
   }
   ORD.sort((a,b) => b.d - a.d);
@@ -291,20 +298,37 @@ function draw(g, model, o){
   for(let s=0; s<nf; s++){
     const face = F[ORD[s].f], idx = face.i, m = idx.length;
 
-    /* screen-space normal from the first non-degenerate corner triple */
+    /* Camera-space normal.  Frame is (x = right, y = depth away, z = up),
+       which is the frame POLY.light is expressed in.
+
+       The normal is then ORIENTED TOWARD THE VIEWER before shading.  That
+       makes the result independent of face winding — whichever side of a
+       surface you can actually see gets a sensible normal — so a builder
+       emitting a quad "backwards" can never produce a black facet. */
     const i0 = idx[0], i1 = idx[1], i2 = idx[2];
-    const e1x = SX[i1]-SX[i0], e1y = SY[i1]-SY[i0], e1z = CZ[i1]-CZ[i0];
-    const e2x = SX[i2]-SX[i0], e2y = SY[i2]-SY[i0], e2z = CZ[i2]-CZ[i0];
+    const e1x = AX[i1]-AX[i0], e1y = AY[i1]-AY[i0], e1z = AZ[i1]-AZ[i0];
+    const e2x = AX[i2]-AX[i0], e2y = AY[i2]-AY[i0], e2z = AZ[i2]-AZ[i0];
     let nx = e1y*e2z - e1z*e2y;
     let ny = e1z*e2x - e1x*e2z;
     let nz = e1x*e2y - e1y*e2x;
     const nm = Math.hypot(nx, ny, nz);
     let dot = 0;
     if(nm > 1e-9){
-      /* screen Y grows downward, so flip it back into the light's frame */
-      dot = (nx*L[0] + (-ny)*L[2] + nz*L[1]) / nm;
-      if(!POLY.cull) dot = Math.abs(dot) * (dot < 0 ? 0.86 : 1);
-      else if(nz > 0) continue;
+      nx/=nm; ny/=nm; nz/=nm;
+      /* view vector to the face: the centroid in persp mode (eye at the
+         origin), or simply +Y in sprite mode (near enough to orthographic) */
+      let vx = 0, vy = 1, vz = 0;
+      if(persp){
+        vx = (AX[i0]+AX[i1]+AX[i2])/3;
+        vy = (AY[i0]+AY[i1]+AY[i2])/3;
+        vz = (AZ[i0]+AZ[i1]+AZ[i2])/3;
+      }
+      const facing = nx*vx + ny*vy + nz*vz;
+      if(facing > 0){
+        if(POLY.cull) continue;          // pointing away — skip it entirely
+        nx = -nx; ny = -ny; nz = -nz;    // otherwise turn it to face us
+      }
+      dot = nx*L[0] + ny*L[1] + nz*L[2];
     }
 
     const band = dot > b0 ? 2 : dot > b1 ? 1 : 0;
