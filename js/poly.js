@@ -24,6 +24,10 @@
              taper:{ f:[0.35,0.55,-0.08], b:[0.85,0.90,0] } },
            { k:"cyl", c:"tyre", axis:"x", at:[-0.78,1.05,0.33], r:0.33,
              len:0.26, sides:8, capC:"hub" },
+           { k:"ring", c:"chrome", axis:"y", at:[0,0.5,-0.3], r:0.06, ri:0.05,
+             sides:16, open:true },
+           { k:"tube", c:"chrome", sides:6, r:0.012,
+             path:[ [0,0.5,-0.3], [0,0.42,-0.24] ] },
            { k:"quad", c:"stripe", p:[ [..],[..],[..],[..] ] }
          ]
        });
@@ -33,6 +37,8 @@
        z     sort bias: higher draws later (on top).  Default 0.
        d     detail flag: 1 = dropped from the far LOD.  Put it on anything
              that stops reading below ~60px — mirrors, exhausts, suspension.
+       a     face alpha, 0..1.  Default 1.  Translucent faces skip the seam
+             stroke, which would otherwise double-blend along the edges.
 
    Why no backface culling: with closed primitives the back faces are
    overdrawn by the front ones anyway, and skipping the cull removes a
@@ -168,13 +174,100 @@ function buildCyl(V, F, p){
   F.push({ i:ringB.slice(), c:cc, z });
 }
 
+/* annulus.  Outer r, inner ri, optional depth `len` along the axis.
+   Emits: driver-side face, far face, outer band, inner band.
+   `open:true` keeps only the near face — right for dial bezels laid flat
+   onto a panel, where nothing behind them is ever seen. */
+function buildRing(V, F, p){
+  const at = p.at || [0,0,0];
+  const r  = p.r  != null ? p.r  : 0.2;
+  const ri = p.ri != null ? p.ri : r*0.8;
+  const len = p.len || 0;
+  const n = Math.max(3, p.sides || 12);
+  const ax = p.axis || "z";
+  const phase = p.phase || 0;
+  const ai = ax === "x" ? 0 : ax === "y" ? 1 : 2;
+  const u = ai === 0 ? 1 : 0, w = ai === 2 ? 1 : 2;
+  const mk = (rad, off) => {
+    const out = [];
+    for(let k=0;k<n;k++){
+      const a = phase + (k/n)*Math.PI*2;
+      const c = [at[0], at[1], at[2]];
+      c[u] = at[u] + Math.cos(a)*rad;
+      c[w] = at[w] + Math.sin(a)*rad;
+      c[ai] = at[ai] + off;
+      out.push(pushV(V, c[0], c[1], c[2]));
+    }
+    return out;
+  };
+  const h = len/2;
+  const oA = mk(r, -h), iA = mk(ri, -h);
+  const z = p.z || 0, sc = slot(p.c,"all"), ec = p.edgeC || sc;
+  for(let k=0;k<n;k++){
+    const j = (k+1)%n;
+    F.push({ i:[iA[k], oA[k], oA[j], iA[j]], c:sc, z });
+  }
+  if(p.open || !len) return;
+  const oB = mk(r, h), iB = mk(ri, h);
+  for(let k=0;k<n;k++){
+    const j = (k+1)%n;
+    F.push({ i:[iB[k], oB[k], oB[j], iB[j]], c:sc, z });
+    F.push({ i:[oA[k], oA[j], oB[j], oB[k]], c:ec, z });
+    F.push({ i:[iA[k], iA[j], iB[j], iB[k]], c:ec, z });
+  }
+}
+
+/* n-gon swept along a polyline.  p.path = [[x,y,z], ...], p.r = radius
+   (number, or an array of one radius per path point).  Gives tube frames,
+   roll hoops, wishbones, steering columns and coaming padding. */
+function buildTube(V, F, p){
+  const path = p.path || [];
+  if(path.length < 2) return;
+  const n = Math.max(3, p.sides || 6);
+  const R = p.r != null ? p.r : 0.02;
+  const rad = i => Array.isArray(R) ? (R[i] != null ? R[i] : R[R.length-1]) : R;
+  const rings = [];
+  for(let i=0;i<path.length;i++){
+    const a = path[Math.max(0, i-1)], b = path[Math.min(path.length-1, i+1)];
+    let tx = b[0]-a[0], ty = b[1]-a[1], tz = b[2]-a[2];
+    const tm = Math.hypot(tx,ty,tz) || 1; tx/=tm; ty/=tm; tz/=tm;
+    /* pick a reference up that isn't parallel to the tangent */
+    let ux = 0, uy = 0, uz = 1;
+    if(Math.abs(tz) > 0.9){ ux = 0; uy = 1; uz = 0; }
+    let rx = ty*uz - tz*uy, ry = tz*ux - tx*uz, rz = tx*uy - ty*ux;
+    const rm = Math.hypot(rx,ry,rz) || 1; rx/=rm; ry/=rm; rz/=rm;
+    const sx = ty*rz - tz*ry, sy = tz*rx - tx*rz, sz = tx*ry - ty*rx;
+    const ring = [], rr = rad(i), c = path[i];
+    for(let k=0;k<n;k++){
+      const t = (k/n)*Math.PI*2, ca = Math.cos(t)*rr, sa = Math.sin(t)*rr;
+      ring.push(pushV(V, c[0] + rx*ca + sx*sa,
+                         c[1] + ry*ca + sy*sa,
+                         c[2] + rz*ca + sz*sa));
+    }
+    rings.push(ring);
+  }
+  const z = p.z || 0, sc = slot(p.c,"all");
+  for(let i=0;i<rings.length-1;i++){
+    const A = rings[i], B = rings[i+1];
+    for(let k=0;k<n;k++){
+      const j = (k+1)%n;
+      F.push({ i:[A[k], A[j], B[j], B[k]], c:sc, z });
+    }
+  }
+  if(p.caps !== false){
+    F.push({ i:rings[0].slice(), c:sc, z });
+    F.push({ i:rings[rings.length-1].slice(), c:sc, z });
+  }
+}
+
 /* explicit polygon: p.p = [[x,y,z], ...] in order */
 function buildPoly(V, F, p){
   const idx = p.p.map(v => pushV(V, v[0], v[1], v[2]));
   F.push({ i:idx, c:slot(p.c,"all"), z:p.z || 0 });
 }
 
-const BUILDERS = { box:buildBox, cyl:buildCyl, quad:buildPoly, tri:buildPoly, poly:buildPoly };
+const BUILDERS = { box:buildBox, cyl:buildCyl, ring:buildRing, tube:buildTube,
+                   quad:buildPoly, tri:buildPoly, poly:buildPoly };
 
 /* far = true builds the reduced mesh, skipping every part marked d:1.
    Both variants are cached on the model, so this costs nothing per frame. */
@@ -291,6 +384,7 @@ function draw(g, model, o){
   const seam = POLY.seam;
   g.save();
   if(o.alpha != null && o.alpha < 1) g.globalAlpha *= o.alpha;
+  const base0 = g.globalAlpha;
   g.lineJoin = "round";
   if(seam) g.lineWidth = 1;
 
@@ -335,12 +429,16 @@ function draw(g, model, o){
     const base = pal[face.c] || pal.body || "#888888";
     const col  = shadeOf(base, band);
 
+    const fa = face.a;
+    if(fa != null && fa < 1) g.globalAlpha = base0 * fa;
+    else if(g.globalAlpha !== base0) g.globalAlpha = base0;
+
     g.beginPath();
     g.moveTo(SX[i0], SY[i0]);
     for(let j=1;j<m;j++) g.lineTo(SX[idx[j]], SY[idx[j]]);
     g.closePath();
     g.fillStyle = col; g.fill();
-    if(seam){ g.strokeStyle = col; g.stroke(); }
+    if(seam && !(fa != null && fa < 1)){ g.strokeStyle = col; g.stroke(); }
     drawn++;
   }
   g.restore();
