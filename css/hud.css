@@ -1,0 +1,254 @@
+/* =====================================================================
+   HUD — presentation skin for the existing game DOM            (drop-in)
+   ---------------------------------------------------------------------
+   Loads AFTER css/game.css, so every rule here is a deliberate override.
+   Nothing in this file invents markup: js/hud.js adds a handful of
+   elements and CSS custom properties, and these rules dress them.
+
+   Everything is scoped behind classes hud.js switches on:
+       #hand.fan          the fanned hand
+       #geargate.stick    the gated gear lever
+       body.hud           the dashboard ribbon + ladder
+   If hud.js is removed, game.css alone still renders the old flat UI.
+   ===================================================================== */
+
+:root{
+  --hud-card-w:66px;          /* matches .card in game.css */
+  --hud-card-h:96px;
+  --hud-lift:-22px;           /* hover lift */
+  --hud-lift-sel:-34px;       /* selected lift */
+  --hud-chrome:#0d0a13;
+}
+
+/* =====================================================================
+   1 · THE FANNED HAND
+   hud.js writes --dx / --dy / --rot / --z per card and adds .fan to the
+   container. The lift is a separate variable so hover, selection and the
+   drag offset all compose into ONE transform instead of fighting.
+   ===================================================================== */
+#hand.fan{
+  display:block; position:relative; overflow:visible;
+  height:var(--fan-h,168px);
+  padding:0; margin:2px 0 4px;
+  perspective:900px;
+  scrollbar-width:none;
+}
+#hand.fan::-webkit-scrollbar{display:none}
+
+#hand.fan .card{
+  position:absolute; left:50%; bottom:6px;
+  margin:0;
+  transform-origin:50% 145%;
+  touch-action:none;                       /* the drag gesture owns the card */
+  cursor:grab;
+  z-index:var(--z,1);
+  transform:
+    translateX(calc(-50% + var(--dx,0px) + var(--drag-x,0px)))
+    translateY(calc(var(--dy,0px) + var(--lift,0px) + var(--drag-y,0px)))
+    rotate(calc(var(--rot,0deg) + var(--drag-rot,0deg)))
+    scale(var(--scale,1));
+  transition:transform .16s cubic-bezier(.22,.9,.28,1), box-shadow .16s ease, filter .16s ease;
+  box-shadow:0 4px 10px rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.08) inset;
+}
+
+/* hover / focus lift — pointer devices only, so a touch-drag doesn't get
+   a phantom hover stuck on the card after release */
+@media (hover:hover){
+  #hand.fan .card:not(.dim):hover{
+    --lift:var(--hud-lift);
+    --scale:1.06;
+    z-index:60;
+    box-shadow:0 14px 22px rgba(0,0,0,.6), 0 0 0 1px rgba(169,133,255,.35);
+    filter:brightness(1.08);
+  }
+}
+#hand.fan .card.sel{
+  --lift:var(--hud-lift-sel);
+  --scale:1.06;
+  z-index:70;
+  outline:3px solid var(--purple-glow); outline-offset:1px;
+  box-shadow:0 16px 26px rgba(0,0,0,.65), 0 0 18px rgba(169,133,255,.5);
+}
+#hand.fan .card.dim{cursor:not-allowed; filter:grayscale(.35) brightness(.75); opacity:.5}
+
+/* while a finger/mouse is down the card follows 1:1 — no transition lag */
+#hand.fan .card.dragging{
+  transition:none; cursor:grabbing; z-index:99;
+  box-shadow:0 22px 34px rgba(0,0,0,.7), 0 0 26px rgba(169,133,255,.45);
+  --scale:1.1;
+}
+/* past the commit threshold the card reads as "this will be played" */
+#hand.fan .card.armed{
+  outline:3px solid var(--purple-glow); outline-offset:2px;
+  filter:brightness(1.18) saturate(1.1);
+}
+#hand.fan .card.armed-off{outline:3px solid var(--heat); outline-offset:2px}
+
+/* the drop ribbon that appears above the fan mid-drag */
+#hud-drop{
+  position:absolute; left:0; right:0; top:0; height:44px;
+  display:flex; align-items:center; justify-content:center;
+  border:2px dashed rgba(169,133,255,.55); border-radius:10px;
+  background:linear-gradient(180deg,rgba(138,92,246,.18),rgba(138,92,246,.02));
+  color:var(--purple-glow); font-size:11px; letter-spacing:3px; text-transform:uppercase; font-weight:800;
+  opacity:0; transform:translateY(-6px); transition:opacity .15s ease, transform .15s ease;
+  pointer-events:none; z-index:5;
+}
+#hud-drop.on{opacity:1; transform:translateY(0)}
+#hud-drop.hot{border-color:var(--purple-glow); background:linear-gradient(180deg,rgba(138,92,246,.35),rgba(138,92,246,.06))}
+#hud-drop.off{border-color:var(--heat); color:#ffb9a5; background:linear-gradient(180deg,rgba(227,73,43,.25),transparent)}
+
+/* the count of what is committed, under the fan */
+#hud-count{
+  text-align:center; font-family:var(--mono); font-size:11px; letter-spacing:2px;
+  color:var(--cream-dim); text-transform:uppercase; margin:-2px 0 8px;
+}
+#hud-count b{color:var(--purple-glow); font-size:13px}
+#hud-count.full b{color:#9fe08a}
+
+/* =====================================================================
+   2 · THE GEAR STICK
+   The gate is the existing #geargate buttons; hud.js adds .stick plus a
+   knob element that slides to whichever option is selected.
+   ===================================================================== */
+#geargate.stick{
+  position:relative; gap:0;
+  display:grid; grid-auto-flow:column; grid-auto-columns:1fr;
+  max-width:320px; margin:10px auto 16px; padding:10px 12px;
+  border-radius:14px;
+  background:
+    linear-gradient(180deg,#2a2338,#15111e 70%),
+    radial-gradient(circle at 50% 0%, rgba(169,133,255,.18), transparent 70%);
+  border:2px solid #0b0910;
+  box-shadow:inset 0 3px 10px rgba(0,0,0,.7), 0 2px 0 rgba(255,255,255,.05);
+}
+/* the polished gate slot the knob rides in */
+#geargate.stick::before{
+  content:""; position:absolute; left:14px; right:14px; top:50%;
+  height:10px; transform:translateY(-50%); border-radius:6px;
+  background:linear-gradient(180deg,#0a0810,#1c1727);
+  box-shadow:inset 0 2px 5px #000, 0 1px 0 rgba(255,255,255,.06);
+}
+#geargate.stick .gearopt{
+  position:relative; z-index:2; width:auto; height:62px; border-radius:10px;
+  border:1.5px solid transparent; background:transparent;
+  box-shadow:none; font-size:24px; gap:2px;
+  transition:color .15s ease, transform .15s ease, opacity .15s ease;
+}
+#geargate.stick .gearopt small{opacity:.85}
+#geargate.stick .gearopt.sel{
+  background:transparent; border-color:transparent; box-shadow:none;
+  color:#fff; transform:translateY(-3px); text-shadow:0 0 14px rgba(169,133,255,.9);
+}
+#geargate.stick .gearopt:disabled{opacity:.22}
+#geargate.stick .gearopt.heatcost small{color:var(--heat)}
+
+#gearknob{
+  position:absolute; z-index:1; top:50%; width:44px; height:44px;
+  margin-top:-22px; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle at 38% 30%, #b79dff, #5a3bbd 55%, #2c1a63);
+  border:2px solid #0b0910;
+  box-shadow:0 6px 14px rgba(0,0,0,.6), 0 0 20px rgba(138,92,246,.55), inset 0 -4px 8px rgba(0,0,0,.5);
+  transition:left .28s cubic-bezier(.34,1.4,.5,1);
+}
+#gearknob.heat{
+  background:radial-gradient(circle at 38% 30%, #ffb08a, #d1441f 55%, #6d1c08);
+  box-shadow:0 6px 14px rgba(0,0,0,.6), 0 0 22px rgba(227,73,43,.65), inset 0 -4px 8px rgba(0,0,0,.5);
+}
+
+/* =====================================================================
+   3 · DASHBOARD RIBBON  (#gauges, restyled + a live Engine bar)
+   ===================================================================== */
+body.hud #gauges{
+  padding:6px 6px 7px;
+  background:
+    radial-gradient(ellipse at 50% -60%, rgba(169,133,255,.22), transparent 62%),
+    linear-gradient(180deg,#2d2544,#161220);
+  border-top:2px solid var(--hud-chrome);
+  box-shadow:inset 0 8px 14px rgba(0,0,0,.45);
+}
+body.hud .gauge{
+  border-color:#463b5e;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(255,255,255,.09), transparent 62%),
+    linear-gradient(180deg,#2b2340,#171223);
+  box-shadow:inset 0 2px 7px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.05);
+}
+body.hud .gauge .val{transition:color .2s ease, transform .2s ease}
+body.hud .gauge.bump .val{transform:scale(1.22)}
+
+/* the Engine tile becomes a thermometer */
+#hud-heatbar{display:flex; gap:2px; justify-content:center; margin-top:4px; padding:0 2px}
+#hud-heatbar i{
+  flex:1; max-width:9px; height:9px; border-radius:2px; display:block;
+  background:#241d31; border:1px solid #3a3148; transition:background .2s ease, box-shadow .2s ease;
+}
+#hud-heatbar i.on{
+  background:linear-gradient(180deg,#ff8a4d,#c22c0d); border-color:#000;
+  box-shadow:0 0 6px rgba(227,73,43,.7);
+}
+body.hud .gauge.heatg.low{animation:hudPulse 1.1s ease-in-out infinite}
+body.hud .gauge.heatg.low .val{color:#ff6a4d}
+@keyframes hudPulse{
+  0%,100%{box-shadow:inset 0 2px 7px rgba(0,0,0,.7), 0 0 0 rgba(227,73,43,0)}
+  50%    {box-shadow:inset 0 2px 7px rgba(0,0,0,.7), 0 0 14px rgba(227,73,43,.75)}
+}
+
+/* =====================================================================
+   4 · POSITION LADDER  (over the board, top-left, like a broadcast feed)
+   ===================================================================== */
+#hud-ladder{
+  position:absolute; top:8px; left:8px; z-index:55;
+  min-width:132px; max-width:52%;
+  border-radius:9px; overflow:hidden;
+  background:linear-gradient(180deg,rgba(13,10,19,.9),rgba(13,10,19,.72));
+  border:1px solid rgba(169,133,255,.3);
+  box-shadow:0 6px 18px rgba(0,0,0,.6);
+  backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+  font-family:var(--disp); pointer-events:none;
+}
+#hud-ladder .lad-hd{
+  font-size:9px; letter-spacing:2.4px; text-transform:uppercase;
+  color:var(--cream-dim); padding:4px 8px 3px;
+  background:linear-gradient(180deg,rgba(138,92,246,.28),transparent);
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+#hud-ladder .lad-row{
+  display:flex; align-items:center; gap:6px; padding:3px 8px 3px 4px;
+  font-size:11.5px; line-height:1.5; color:var(--cream);
+  border-left:3px solid transparent;
+  transition:transform .42s cubic-bezier(.22,.9,.28,1), background .3s ease;
+}
+#hud-ladder .lad-row.you{background:rgba(138,92,246,.2); border-left-color:var(--purple-glow)}
+#hud-ladder .lad-row.out{opacity:.45}
+#hud-ladder .lad-pos{
+  font-family:var(--mono); font-size:10px; width:13px; text-align:right; color:var(--cream-dim); flex:none;
+}
+#hud-ladder .lad-dot{
+  width:9px; height:9px; border-radius:50%; flex:none;
+  border:1px solid rgba(0,0,0,.6); box-shadow:0 0 5px rgba(0,0,0,.6);
+}
+#hud-ladder .lad-name{
+  flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  letter-spacing:.4px;
+}
+#hud-ladder .lad-gap{
+  font-family:var(--mono); font-size:10px; color:var(--cream-dim); flex:none;
+}
+#hud-ladder .lad-row.lead .lad-gap{color:#9fe08a}
+/* a place change flashes the row */
+#hud-ladder .lad-row.gain{animation:ladGain .8s ease-out}
+#hud-ladder .lad-row.lose{animation:ladLose .8s ease-out}
+@keyframes ladGain{0%{background:rgba(159,224,138,.5)} 100%{background:transparent}}
+@keyframes ladLose{0%{background:rgba(227,73,43,.45)}  100%{background:transparent}}
+
+/* the ladder replaces the header chips while it is up, and both stand
+   down whenever the cockpit view owns the board */
+body.hud #standings{display:none}
+#trackwrap.fp-live #hud-ladder{display:none}
+
+@media (prefers-reduced-motion:reduce){
+  #hand.fan .card, #gearknob, #hud-ladder .lad-row{transition:none !important}
+  #hud-ladder .lad-row.gain, #hud-ladder .lad-row.lose,
+  body.hud .gauge.heatg.low{animation:none !important}
+}
