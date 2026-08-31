@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#17141b">
+
+<title>HEAT - Pedal to the Metal!</title>
+
+<script>
+window.addEventListener("error", e => {
+  if (e.filename) alert("Error in " + e.filename.split("/").pop() +
+                        " line " + e.lineno + ":\n" + e.message);
+});
+</script>
+
+<!-- on-screen JS error reporter (delete this line when you no longer want it) -->
+<script src="js/diagnostic.js"></script>
+
+<link rel="stylesheet" href="css/game.css">
+<link rel="stylesheet" href="css/career.css">
+<!--<link rel="stylesheet" href="css/hud.css">-->
+</head>
+<body>
+
+<!-- ===== INTRO: loading + title, layered over the game (single page) ===== -->
+<div id="stage" role="button" tabindex="0" aria-label="Start game">
+  <div id="prompt">
+    <div id="Heats">HEAT <span>- Pedal to the Metal</div>
+    <div class="eyebrow">A Digital Fan Game</div>
+    <div id="start">Start <span class="metal">Game</span></div>
+  
+    </div>
+  <div id="hint">Tap anywhere to race</div>
+</div>
+<div id="soundNote">🔊 Tap to enable sound</div>
+<div id="loader">
+  <!-- wordmark: the PNG is preferred; if it fails to load, onerror hides it and
+       reveals the original text version so the loader never shows a broken box -->
+  <img class="load-title" id="loadWordmark" src="assets/titlename.png" alt="HEAT"
+       onerror="this.hidden=true; var t=document.getElementById('loadWordmarkText'); if(t) t.hidden=false;">
+  <div class="load-title" id="loadWordmarkText" hidden>HEAT<b>!</b></div>
+  <div class="gantry">
+    <div class="lamp"></div><div class="lamp"></div><div class="lamp"></div>
+    <div class="lamp"></div><div class="lamp"></div>
+  </div>
+  <div>
+    <div class="load-bar"><div class="load-fill" id="loadFill"></div></div>
+    <p class="load-status" id="loadStatus">Warming up the engine…</p>
+    <p class="load-status" id="loadSound" style="display:none; margin-top:12px; color:var(--purple-glow)">🔊 Tap anywhere to start the music</p>
+  </div>
+</div>
+<!-- ===== end intro ===== -->
+
+<!-- ===== pre-race loading screen (summary → lights out, and between championship races) ===== -->
+<div id="raceload">
+  <div>
+    <div class="rl-track" id="rlTitle">Pukekohe</div>
+    <div class="rl-sub" id="rlSub"></div>
+  </div>
+  <div class="gantry">
+    <div class="lamp"></div><div class="lamp"></div><div class="lamp"></div>
+    <div class="lamp"></div><div class="lamp"></div>
+  </div>
+  <div>
+    <div class="load-bar"><div class="load-fill" id="rlFill"></div></div>
+    <p class="load-status" id="rlStatus">Wheeling it out of the garage…</p>
+  </div>
+</div>
+
+<div id="topbar">
+  <div class="badge">17</div>
+  <div class="hdrtext">
+    <h1>HEAT <span style="color:var(--purple-glow)">·</span> </h1>
+    <div class="subrow">
+      <div class="sub" id="roundlbl">Pedal to the Metal!</div>
+      <div id="wchip" hidden></div>
+    </div>
+  </div>
+  <div id="standings"></div>
+  <button id="menubtn" aria-label="Menu" title="Menu">☰</button>
+</div>
+
+<div id="trackwrap">
+  <svg id="tracksvg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet"></svg>
+</div>
+
+<div id="gauges">
+  <div class="gauge"><div class="lbl">Gear</div><div class="val" id="g-gear">1</div></div>
+  <div class="gauge heatg"><div class="lbl">Engine</div><div class="val" id="g-heat">–</div></div>
+  <div class="gauge speedg"><div class="lbl">Speed</div><div class="val" id="g-speed">–</div></div>
+  <div class="gauge"><div class="lbl">Hand</div><div class="val" id="g-hand">7</div></div>
+  <div class="gauge deckg" id="g-deck-tile" title="Draw deck — tap to see what's left"><div class="lbl">Deck</div><div class="val" id="g-deck">–</div></div>
+  <div class="gauge"><div class="lbl">Position</div><div class="val" id="g-pos">–</div></div>
+</div>
+
+<div id="panel"></div>
+
+<div id="logwrap">
+  <button id="logtoggle" onclick="document.getElementById('logwrap').classList.toggle('open')">▸ race radio…</button>
+  <div id="logbody"></div>
+</div>
+
+<div id="toast"></div>
+
+<div id="confirmModal" class="overlay" style="display:none">
+  <div class="sheet">
+    <h2 id="cfTitle">⚠ Spin-out warning</h2>
+    <div class="tag" id="cfTag">Corner check</div>
+    <div id="cfBody" class="forecast spin cfbody"></div>
+    <div class="btnrow">
+      <button class="act hot" id="cfYes">Send it anyway</button>
+      <button class="act secondary" id="cfNo">Back off</button>
+    </div>
+  </div>
+</div>
+<div id="spinModal" class="overlay" style="display:none">
+  <div class="sheet">
+    <h2>💥 SPINOUTT!</h2>
+    <img src="screens/spinout1.png" alt="Spin out">
+    <div class="spinsub" id="spinSub">You lost the back end — dropped to 1st gear and picked up Stress.</div>
+    <div class="btnrow"><button class="act hot" id="spinClose">Shake it off</button></div>
+  </div>
+</div>
+<div id="trackModal" class="overlay" style="display:none">
+  <div class="sheet">
+    <div class="tag" id="tmEyebrow"></div>
+    <h2 id="tmName"></h2>
+    <div class="tm-art" id="tmArt"></div>
+    <div class="tm-meta" id="tmMeta"></div>
+    <div class="tm-brief" id="tmBrief"></div>
+    <div class="btnrow">
+      <button class="act secondary" id="tmCancel">Cancel</button>
+      <button class="act" id="tmNext">Next ▸</button>
+    </div>
+  </div>
+</div>
+<div id="setup" class="overlay"></div>
+
+
+<!-- ===== soundtrack: opening (attract, carried from title) → race (loop) → win (once) ===== -->
+<audio id="heatOpening" src="audio/opening.mp3" loop preload="auto"></audio>
+<audio id="heatRace"    src="audio/race.mp3"    loop preload="auto"></audio>
+<audio id="heatWin"     src="audio/win.mp3"     preload="auto"></audio>
+<audio id="heatCrash"   src="audio/crash.mp3"   preload="auto"></audio>
+
+<!-- =====================================================================
+     SCRIPTS — load order matters. Anything that *registers* data must come
+     before the code that reads it.
+
+       1. track registry   → defines TRACKS + defineTrack()
+       2. tracks/*.js      → one file per circuit, each self-registers.
+                             Order here = order on the track-select screen.
+       3. data/cups.js     → championship seasons (lists of track keys)
+       4. js/game.js       → the game itself
+       5. js/audio.js, js/intro.js
+       6. career map registry → defines defineCareerMap()
+       7. data/career-maps/*.js → one file per career map
+       8. js/career.js     → career mode
+
+     TO ADD A TRACK: drop tracks/<key>.js in, add one line to the TRACKS block.
+     TO ADD A CAREER MAP: drop data/career-maps/<key>.js in, add one line to
+     the CAREER MAPS block. Nothing else in this file changes.
+     ===================================================================== -->
+
+<script src="js/track-registry.js"></script>
+
+<!-- ===== TRACKS ===== -->
+<script src="tracks/usa.js"></script>
+<script src="tracks/italy.js"></script>
+<script src="tracks/france.js"></script>
+<script src="tracks/britain.js"></script>
+<script src="tracks/mexico.js"></script>
+<script src="tracks/japan.js"></script>
+<script src="tracks/spain.js"></script>
+<script src="tracks/dutch.js"></script>
+<script src="tracks/southafrica.js"></script>
+<script src="tracks/germany.js"></script>
+<script src="tracks/adelaide.js"></script>
+<script src="tracks/hungary.js"></script>
+<script src="tracks/jarama.js"></script> 
+<script src="tracks/pukekohe.js"></script>
+<script src="tracks/monaco.js"></script>
+<script src="tracks/montjuic.js"></script>
+<script src="tracks/newyork.js"></script>
+<script src="tracks/sanmarino.js"></script>
+<script src="tracks/silverrock.js"></script>
+<script src="tracks/spa.js"></script> 
+<script src="tracks/zandvoort.js"></script>
+
+  <!-- ===== DRAG TRACKS ===== -->
+  <script src="tracks/drags/drag1.js"></script>
+  <script src="tracks/drags/drag2.js"></script>
+  <script src="tracks/drags/drag3.js"></script>
+
+  <!-- ===== BOSS TRACKS =====
+       Career mode keeps these OUT of the ordinary circuit pool. Each career
+       draws three of the six at roll-up and pins one to the end of each act:
+       Act I final, Act II final, Grand Final. -->
+  <script src="tracks/boss/boss1.js"></script>
+  <script src="tracks/boss/boss2.js"></script>
+  <script src="tracks/boss/boss3.js"></script>
+  <script src="tracks/boss/boss4.js"></script>
+  <script src="tracks/boss/boss5.js"></script>
+  <script src="tracks/boss/boss6.js"></script>
+
+<!-- ===== CHAMPIONSHIP SEASONS ===== -->
+<script src="data/cups.js"></script>
+
+  
+<!-- ===== POLYGON GRAPHICS (Settings > Graphics) =====
+     poly.js first — the models register themselves into it. -->
+<script src="js/poly.js"></script>
+<script src="js/models/car-f1.js"></script>
+<!-- the shared hull both cockpits loft their bonnet from — must precede them -->
+<script src="js/models/cockpit-shell.js"></script>
+<script src="js/models/cockpit.js"></script>
+<script src="js/models/cockpit-hi.js"></script>
+
+<!-- ===== GAME ===== -->
+<script src="js/game.js"></script>
+<!--<script src="js/hud.js"></script> -->
+<script src="js/board-terrains.js"></script>
+<script src="js/fpview-chase.js"></script>
+<script src="js/fpview.js"></script>
+<script src="js/fpview-poly.js"></script>
+<!--  <script src="js/retro.js"></script> -->
+<script src="js/fpview-terrains.js"></script>
+<!--<script src="js/camera25.js"></script> -->
+<script src="js/audio.js"></script>
+<script src="js/intro.js"></script>
+
+<!-- ===== CAREER MAPS ===== -->
+<script src="js/career-map-registry.js"></script>
+<!--<script src="data/career-maps/coastrun.js"></script>
+<script src="data/career-maps/summitgp.js"></script>*
+  --!>
+
+<!-- ===== CAREER MODE ===== -->
+<!-- career-mods.js must load AFTER game.js (it wraps game functions) and
+     BEFORE career.js (which reads CAREER_MODS / careerApplyFx / careerPerk) -->
+<script src="js/career-mods.js"></script>
+<script src="js/career.js"></script>
+
+
+
+</body>
+</html>
